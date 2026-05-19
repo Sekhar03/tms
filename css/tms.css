@@ -1,0 +1,283 @@
+/* iSupayX ISU Admin Dashboard Styling - TMS Page */
+:root {
+    --isu-orange: #ef6c35;
+    --isu-teal: #0b7570;
+    --isu-teal-dark: #085e5a;
+    --isu-teal-light: #81babb;
+    --isu-dark-blue: #324354;
+    --isu-dark-blue-hover: #263340;
+    --isu-bg: #f4f6fa;
+    --isu-border: #e2e8f0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--isu-bg);
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Header Styling */
+.isu-header {
+    background-color: var(--isu-orange);
+    height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.isu-logo-circle {
+    width: 36px;
+    height: 36px;
+    background-color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.isu-logo-text {
+    color: var(--isu-teal);
+    font-weight: 800;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.isu-brand-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-toggle-btn {
+    font-size: 1.5rem;
+    border: none;
+    background: transparent;
+    padding: 0;
+    line-height: 1;
+}
+
+.wallet-badge {
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.settings-btn {
+    font-size: 1.25rem;
+    background: transparent;
+    border: none;
+    transition: transform 0.2s ease;
+}
+
+.settings-btn:hover {
+    transform: rotate(45deg);
+}
+
+/* Main Container Wrapper */
+.isu-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.isu-sidebar {
+    width: 250px;
+    background-color: var(--isu-teal);
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    z-index: 1020;
+    transition: all 0.3s ease;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+    background-color: var(--isu-teal-dark);
+    padding: 12px 18px;
+}
+
+.sidebar-title {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 1px;
+}
+
+.sidebar-nav .nav-link {
+    color: white;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    cursor: default;
+}
+
+/* Disabled styling for dummy sidebar items */
+.sidebar-nav .nav-link.disabled-sidebar-item {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: var(--isu-teal-dark);
+    font-weight: 600;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.nav-icon {
+    font-size: 1.1rem;
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+}
+
+.chevron-icon {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Main Content Styling */
+.isu-main-content {
+    flex: 1;
+    margin-left: 250px;
+    margin-top: 60px;
+    padding: 40px;
+    transition: all 0.3s ease;
+    background-color: var(--isu-bg);
+}
+
+/* Dashboard White Box Container */
+.dashboard-card-container {
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid var(--isu-border);
+    border-top: 4px solid var(--isu-dark-blue);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    min-height: 320px;
+    position: relative;
+    padding: 60px 40px 40px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tms-pill {
+    position: absolute;
+    top: -14px;
+    left: 40px;
+    background-color: var(--isu-dark-blue);
+    color: white;
+    font-weight: bold;
+    font-size: 0.75rem;
+    padding: 4px 18px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+    z-index: 10;
+}
+
+/* Module Cards */
+.dashboard-module-card {
+    background-color: var(--isu-dark-blue);
+    border-radius: 20px;
+    height: 140px;
+    position: relative;
+    padding: 50px 20px 20px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.dashboard-module-card.functional-card {
+    cursor: pointer;
+}
+
+.dashboard-module-card.functional-card:hover {
+    transform: translateY(-5px);
+    background-color: var(--isu-dark-blue-hover);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Dummy/Disabled Central Ops Card style */
+.dashboard-module-card.dummy-card {
+    cursor: not-allowed;
+    opacity: 0.95;
+}
+
+.card-icon-badge {
+    position: absolute;
+    top: -38px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 76px;
+    height: 76px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.badge-inner {
+    width: 58px;
+    height: 58px;
+    background-color: var(--isu-dark-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.6rem;
+    transition: all 0.3s ease;
+    border: 2px solid white;
+}
+
+.dashboard-module-card.functional-card:hover .badge-inner {
+    background-color: var(--isu-dark-blue-hover);
+}
+
+.card-module-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Collapsed Sidebar (Responsive) */
+@media (max-width: 992px) {
+    .isu-sidebar {
+        left: -250px;
+    }
+    
+    .isu-sidebar.show {
+        left: 0;
+    }
+    
+    .isu-main-content {
+        margin-left: 0;
+    }
+}

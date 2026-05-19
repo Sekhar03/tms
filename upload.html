@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Report - ISU Admin Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Style -->
+    <link href="css/style.css?v=2" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="isu-header d-flex justify-content-between align-items-center px-3">
+        <div class="header-left d-flex align-items-center">
+            <div class="isu-logo-circle d-flex align-items-center justify-content-center">
+                <span class="isu-logo-text">isu</span>
+            </div>
+            <span class="isu-brand-name ms-2">Iserveu</span>
+            <button class="btn sidebar-toggle-btn text-white ms-3" type="button" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <div class="header-right d-flex align-items-center gap-3">
+            <div class="wallet-badge text-white d-flex align-items-center gap-2">
+                <i class="bi bi-wallet2"></i>
+                <span>W1: ₹56,976,869.51</span>
+            </div>
+            <div class="wallet-badge text-white d-flex align-items-center gap-2">
+                <i class="bi bi-wallet2"></i>
+                <span>W2: ₹0.00</span>
+            </div>
+            <div class="user-dropdown dropdown">
+                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center gap-2 px-3 py-1 text-white border-0 rounded-pill" style="background: rgba(255,255,255,0.15);" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle"></i>
+                    <span>COMMON ADMIN</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+            <button class="btn settings-btn text-white p-0" type="button" aria-label="Settings">
+                <i class="bi bi-gear-fill"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="isu-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="isu-sidebar text-white">
+            <div class="sidebar-header">
+                <span class="sidebar-title">NAVIGATION</span>
+            </div>
+            <ul class="nav flex-column sidebar-nav">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link" id="sidebar-dashboard-link">
+                        <i class="bi bi-speedometer2 nav-icon"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="reports.html" class="nav-link d-flex justify-content-between align-items-center" id="sidebar-reports-link">
+                        <div>
+                            <i class="bi bi-file-earmark-text nav-icon"></i>
+                            <span class="nav-text">Reports</span>
+                        </div>
+                        <i class="bi bi-chevron-right chevron-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-cash nav-icon"></i>
+                            <span class="nav-text">Finance Function</span>
+                        </div>
+                        <i class="bi bi-chevron-right chevron-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-people nav-icon"></i>
+                            <span class="nav-text">Client User Mgmt.</span>
+                        </div>
+                        <i class="bi bi-chevron-right chevron-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-people nav-icon"></i>
+                            <span class="nav-text">Internal User Mgmt.</span>
+                        </div>
+                        <i class="bi bi-chevron-right chevron-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-headset nav-icon"></i>
+                        <span class="nav-text">Support Function</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-shield-check nav-icon"></i>
+                        <span class="nav-text">FRM</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-sliders nav-icon"></i>
+                        <span class="nav-text">Centralize Ops</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-person-plus nav-icon"></i>
+                            <span class="nav-text">Common Onboarding</span>
+                        </div>
+                        <i class="bi bi-chevron-right chevron-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-percent nav-icon"></i>
+                        <span class="nav-text">Commission Setting</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-search nav-icon"></i>
+                        <span class="nav-text">Audit Trail</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="reports.html" class="nav-link active" id="sidebar-tms-link">
+                        <i class="bi bi-volume-up nav-icon"></i>
+                        <span class="nav-text">TMS</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="isu-main-content">
+            <!-- Breadcrumbs -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item"><a href="reports.html">Reports</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Upload</li>
+                </ol>
+            </nav>
+            
+            <h1 class="section-title mb-4">Reports</h1>
+            
+            <div class="reports-container p-4 p-md-5 bg-white rounded shadow-sm">
+                <!-- Upload Step: File Drop Area -->
+                <div id="reports-upload-step">
+                    <div class="row mb-4 g-3">
+                        <div class="col-md-6">
+                            <div class="info-box p-3 bg-light rounded">
+                                <span class="text-muted d-block small fw-semibold">Selected Bank</span>
+                                <span id="display-selected-bank" class="text-dark-blue fw-bold">-</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box p-3 bg-light rounded">
+                                <span class="text-muted d-block small fw-semibold">Selected Report Type</span>
+                                <span id="display-selected-report-type" class="text-dark-blue fw-bold">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="reportsUploadForm" novalidate>
+                        <div class="mb-4">
+                            <div class="drag-drop-zone text-center p-5 border border-2 border-dashed rounded" id="drop-zone">
+                                <input type="file" id="fileInput" name="reportFile" class="d-none" accept=".xls,.xlsx,.csv" required>
+                                
+                                <div class="upload-prompt">
+                                    <i class="bi bi-cloud-arrow-up-fill text-muted display-4 mb-3 d-block"></i>
+                                    <p class="mb-2 fw-semibold">Drag & Drop file here or</p>
+                                    <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                                        <button type="button" class="btn btn-outline-primary btn-sm px-3" onclick="document.getElementById('fileInput').click()">Browse File</button>
+                                        <span class="text-muted">or</span>
+                                        <button type="button" class="btn btn-link btn-sm text-decoration-none px-0 fw-semibold" id="download-sample-btn" style="color: var(--isu-teal);">
+                                            <i class="bi bi-download me-1"></i>Download Sample File
+                                        </button>
+                                    </div>
+                                    <p class="text-muted small mb-0">Allowed formats: XLS, XLSX, CSV | Max size: 10 MB</p>
+                                </div>
+                                
+                                <div class="file-info d-none">
+                                    <i class="bi bi-file-earmark-excel-fill text-success display-4 mb-3 d-block"></i>
+                                    <p class="mb-2 fw-semibold file-name-display text-truncate px-3"></p>
+                                    <p class="text-muted file-size-display small mb-3"></p>
+                                    <button type="button" class="btn btn-outline-danger btn-sm px-3" id="remove-file-btn">Remove File</button>
+                                </div>
+                            </div>
+                            <div class="invalid-feedback text-center mt-2 d-none" id="file-error-message">File is required</div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-5">
+                            <button type="submit" class="btn btn-success px-4">Submit</button>
+                            <button type="button" class="btn btn-secondary px-4" id="btn-upload-back">Back</button>
+                            <a href="index.html" class="btn btn-secondary px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Application JS -->
+    <script src="js/app.js?v=6"></script>
+</body>
+</html>

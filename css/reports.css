@@ -1,0 +1,468 @@
+/* iSupayX ISU Admin Dashboard Styling - Reports Page */
+:root {
+    --isu-orange: #ef6c35;
+    --isu-teal: #0b7570;
+    --isu-teal-dark: #085e5a;
+    --isu-teal-light: #81babb;
+    --isu-dark-blue: #324354;
+    --isu-dark-blue-hover: #263340;
+    --isu-bg: #f4f6fa;
+    --isu-border: #e2e8f0;
+    
+    /* Screenshot-specific palette */
+    --card-teal: #229a92;
+    --card-teal-hover: #1c827b;
+    --page-mint-bg: #e2f0ed;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--isu-bg);
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Header Styling */
+.isu-header {
+    background-color: var(--isu-orange);
+    height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.isu-logo-circle {
+    width: 36px;
+    height: 36px;
+    background-color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.isu-logo-text {
+    color: var(--isu-teal);
+    font-weight: 800;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.isu-brand-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-toggle-btn {
+    font-size: 1.5rem;
+    border: none;
+    background: transparent;
+    padding: 0;
+    line-height: 1;
+}
+
+.wallet-badge {
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.settings-btn {
+    font-size: 1.25rem;
+    background: transparent;
+    border: none;
+    transition: transform 0.2s ease;
+}
+
+.settings-btn:hover {
+    transform: rotate(45deg);
+}
+
+/* Main Container Wrapper */
+.isu-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.isu-sidebar {
+    width: 250px;
+    background-color: var(--isu-teal);
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    z-index: 1020;
+    transition: all 0.3s ease;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+    background-color: var(--isu-teal-dark);
+    padding: 12px 18px;
+}
+
+.sidebar-title {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 1px;
+}
+
+.sidebar-nav .nav-link {
+    color: white;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    cursor: default;
+}
+
+/* Disabled styling for dummy sidebar items */
+.sidebar-nav .nav-link.disabled-sidebar-item {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: var(--isu-teal-dark);
+    font-weight: 600;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.nav-icon {
+    font-size: 1.1rem;
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+}
+
+.chevron-icon {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Main Content Styling (Greenish/mint background) */
+.isu-main-content {
+    flex: 1;
+    margin-left: 250px;
+    margin-top: 60px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    background-color: var(--page-mint-bg);
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Custom Card Container matching layout */
+.custom-card-container {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 1200px;
+    border: none;
+    overflow: hidden;
+}
+
+.custom-card-header {
+    background-color: var(--card-teal);
+    padding: 16px 24px;
+    height: 70px;
+}
+
+.custom-card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    letter-spacing: 0.3px;
+    width: 100%;
+}
+
+/* Back circular chevron-left button with cyan background and white arrow */
+.back-circle-btn {
+    width: 34px;
+    height: 34px;
+    background-color: #0dddd3; /* cyan background matching screenshot */
+    border-radius: 50%;
+    color: white !important;
+    transition: transform 0.2s, background-color 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.back-circle-btn:hover {
+    transform: scale(1.05);
+    background-color: #0bcbc2;
+}
+
+/* Warning note */
+.red-note {
+    color: #dc2626;
+    font-size: 0.85rem;
+    letter-spacing: 0.2px;
+}
+
+/* Download Sample file Link */
+.btn-sample-download {
+    background: transparent;
+    border: none;
+    color: var(--card-teal);
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 0;
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+.btn-sample-download:hover {
+    color: var(--card-teal-hover);
+    text-decoration: underline;
+}
+
+/* Input Styles */
+.custom-form-label {
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.custom-select {
+    border: 1px solid #cbd5e1;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    border-radius: 8px;
+    color: #334155;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.custom-select:focus {
+    border-color: var(--card-teal);
+    box-shadow: 0 0 0 3px rgba(34, 154, 146, 0.15);
+}
+
+/* File selection custom group */
+.custom-upload-group {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+}
+
+.custom-upload-group .form-control {
+    border: none;
+    font-size: 0.92rem;
+}
+
+.custom-upload-group .form-control:focus {
+    box-shadow: none;
+    border: none;
+}
+
+.custom-upload-group:focus-within {
+    border-color: var(--card-teal);
+    box-shadow: 0 0 0 3px rgba(34, 154, 146, 0.15);
+}
+
+.btn-browse {
+    background-color: #cbd5e1;
+    color: #334155;
+    border: none;
+    border-left: 1px solid #cbd5e1;
+    transition: background-color 0.2s;
+}
+
+.btn-browse:hover {
+    background-color: #94a3b8;
+}
+
+/* Upload Submit button */
+.btn-upload-submit {
+    background-color: var(--card-teal);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    height: 43px; /* Align height with the input-group browse box */
+}
+
+.btn-upload-submit:hover {
+    background-color: var(--card-teal-hover);
+    box-shadow: 0 4px 12px rgba(34, 154, 146, 0.2);
+}
+
+/* Success Modal Overlay & Popup card with blur background */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+@keyframes fadeInOverlay {
+    from { background-color: rgba(0, 0, 0, 0); backdrop-filter: blur(0px); }
+    to { background-color: rgba(0, 0, 0, 0.35); backdrop-filter: blur(5px); }
+}
+
+.success-popup-card {
+    background-color: white;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    animation: scaleInCard 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleInCard {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Success Circle Checkmark matching layout */
+.success-circle-check {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3.5px solid #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-circle-check .bi-check-lg {
+    font-size: 3.2rem;
+    color: #10b981 !important;
+    font-weight: 900;
+}
+
+.popup-title {
+    color: #1e293b;
+    font-size: 1.3rem;
+}
+
+.popup-message {
+    font-size: 0.88rem;
+    color: #64748b !important;
+}
+
+.btn-okay {
+    background-color: #10b981;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    padding: 8px 30px;
+    transition: background-color 0.2s;
+}
+
+.btn-okay:hover {
+    background-color: #059669;
+}
+
+/* Bucket path section inside success popup */
+.bucket-path-box {
+    background-color: #f0faf9;
+    border: 1px solid #b2dfdb;
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.bucket-url-display {
+    background-color: #e8f5f4;
+    border: 1px solid #b2dfdb;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-top: 6px;
+}
+
+.bucket-url-text {
+    font-size: 0.82rem;
+    color: #00695c;
+    word-break: break-all;
+    background: transparent;
+    border: none;
+    padding: 0;
+    flex: 1;
+}
+
+.btn-copy-url {
+    background: transparent;
+    border: none;
+    color: var(--card-teal);
+    padding: 2px 6px;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-copy-url:hover {
+    color: var(--card-teal-hover);
+}
+
+.text-teal {
+    color: var(--card-teal);
+}
+
+.btn-goto-bucket {
+    background-color: var(--card-teal);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    padding: 10px 20px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-goto-bucket:hover {
+    background-color: var(--card-teal-hover);
+    color: white;
+    box-shadow: 0 4px 12px rgba(34, 154, 146, 0.25);
+}
+
+/* Collapsed Sidebar (Responsive) */
+@media (max-width: 992px) {
+    .isu-sidebar {
+        left: -250px;
+    }
+    
+    .isu-sidebar.show {
+        left: 0;
+    }
+    
+    .isu-main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+}
