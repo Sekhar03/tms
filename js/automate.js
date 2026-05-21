@@ -45,9 +45,9 @@ $(document).ready(function () {
 
     // 1b. EMAIL INTEGRATION SERVICE CONFIGURATION
     let emailConfig = {
-        enabled: false,
+        enabled: true,
         provider: 'web3forms',
-        web3FormsKey: '',
+        web3FormsKey: '1cb10e5c-cf81-487e-a2b1-52acda767bbc',
         emailJSPublicKey: '',
         emailJSServiceID: '',
         emailJSTemplateID: ''
@@ -59,13 +59,14 @@ $(document).ready(function () {
         
         if (stored) {
             emailConfig = JSON.parse(stored);
-        } else if (legacyStored) {
-            const legacy = JSON.parse(legacyStored);
-            emailConfig.enabled = legacy.enabled || false;
-            emailConfig.provider = 'emailjs';
-            emailConfig.emailJSPublicKey = legacy.publicKey || '';
-            emailConfig.emailJSServiceID = legacy.serviceId || '';
-            emailConfig.emailJSTemplateID = legacy.templateId || '';
+            // Overwrite key or enable if it was not previously configured to ensure immediate usage of their key
+            if (!emailConfig.web3FormsKey) {
+                emailConfig.web3FormsKey = '1cb10e5c-cf81-487e-a2b1-52acda767bbc';
+                emailConfig.enabled = true;
+                localStorage.setItem('tms_email_integration_config', JSON.stringify(emailConfig));
+            }
+        } else {
+            localStorage.setItem('tms_email_integration_config', JSON.stringify(emailConfig));
         }
         
         // Populate inputs
