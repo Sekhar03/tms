@@ -1,0 +1,12 @@
+{
+  "name": "tms-dashboard",
+  "version": "1.0.0",
+  "description": "Terminal Management System Dashboard",
+  "main": "index.html",
+  "scripts": {
+    "dev": "echo 'Starting static local server...'",
+    "serve": "python -m http.server 8080"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

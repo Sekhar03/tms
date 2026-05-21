@@ -6,17 +6,63 @@ $(document).ready(function () {
 
     // 1. EMAIL MANAGEMENT
     let emails = [];
-    const defaultEmails = ['ops-lead@iserveu.in', 'bank-audit@firstbank.com'];
+    const defaultEmails = [
+        { email: 'ops-lead@iserveu.in', bank: 'All Banks' },
+        { email: 'bank-audit@firstbank.com', bank: 'SBI' }
+    ];
 
     // Load emails from LocalStorage
     function loadEmails() {
         const stored = localStorage.getItem('tms_automate_emails');
         if (stored) {
-            emails = JSON.parse(stored);
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) {
+                    emails = parsed.map(item => {
+                        if (typeof item === 'string') {
+                            return { email: item, bank: 'All Banks' };
+                        }
+                        return item;
+                    });
+                } else {
+                    emails = [...defaultEmails];
+                }
+            } catch (err) {
+                emails = [...defaultEmails];
+            }
         } else {
             emails = [...defaultEmails];
             localStorage.setItem('tms_automate_emails', JSON.stringify(emails));
         }
+
+        // Synchronize with backend if available
+        $.ajax({
+            url: '/api/emails',
+            type: 'GET',
+            timeout: 2000,
+            success: function (data) {
+                if (Array.isArray(data) && data.length > 0) {
+                    emails = data;
+                    localStorage.setItem('tms_automate_emails', JSON.stringify(emails));
+                    renderEmails();
+                } else {
+                    // Sync our local state to backend if backend returns empty but we have local emails
+                    if (emails.length > 0) {
+                        emails.forEach(item => {
+                            $.ajax({
+                                url: '/api/emails',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(item)
+                            });
+                        });
+                    }
+                }
+            },
+            error: function () {
+                console.log('Backend API /api/emails not available or timed out. Running in client-only mode.');
+            }
+        });
     }
 
     // Render Emails chips
@@ -29,11 +75,29 @@ $(document).ready(function () {
             return;
         }
 
-        emails.forEach((email, index) => {
+        emails.forEach((emailObj, index) => {
+            let badgeClass = 'bg-secondary';
+            if (emailObj.bank === 'All Banks') {
+                badgeClass = 'bg-success';
+            } else if (emailObj.bank === 'HDFC Bank') {
+                badgeClass = 'bg-primary';
+            } else if (emailObj.bank === 'ICICI Bank') {
+                badgeClass = 'bg-info text-dark';
+            } else if (emailObj.bank === 'SBI') {
+                badgeClass = 'bg-danger';
+            } else if (emailObj.bank === 'Axis Bank') {
+                badgeClass = 'bg-warning text-dark';
+            } else if (emailObj.bank === 'Yes Bank') {
+                badgeClass = 'bg-dark';
+            } else if (emailObj.bank === 'Kotak Bank') {
+                badgeClass = 'bg-purple text-white'; // Bootstrap/custom purple badge
+            }
+            
             const chip = $(`
                 <div class="email-item" data-index="${index}">
                     <i class="bi bi-envelope text-teal"></i>
-                    <span>${email}</span>
+                    <span>${emailObj.email}</span>
+                    <span class="badge ${badgeClass} fs-8 ms-1" style="font-size: 0.7rem; padding: 2px 6px;">${emailObj.bank}</span>
                     <button class="email-remove-btn" title="Remove recipient" aria-label="Remove recipient">
                         <i class="bi bi-x"></i>
                     </button>
@@ -179,7 +243,9 @@ $(document).ready(function () {
     $('#emailAddForm').on('submit', function (e) {
         e.preventDefault();
         const input = $('#emailInput');
+        const bankSelect = $('#emailBankSelect');
         const emailVal = input.val().trim();
+        const bankVal = bankSelect.val();
         const errorMsg = $('#emailError');
 
         input.removeClass('is-invalid');
@@ -199,20 +265,40 @@ $(document).ready(function () {
             return;
         }
 
-        if (emails.includes(emailVal)) {
+        const isDuplicate = emails.some(item => item.email.toLowerCase() === emailVal.toLowerCase() && item.bank === bankVal);
+        if (isDuplicate) {
             input.addClass('is-invalid');
-            errorMsg.text('This email ID is already configured.').removeClass('d-none');
+            errorMsg.text(`This email ID is already configured for ${bankVal}.`).removeClass('d-none');
             return;
         }
 
         // Add email
-        emails.push(emailVal);
+        const newRecipient = { email: emailVal, bank: bankVal };
+        emails.push(newRecipient);
         localStorage.setItem('tms_automate_emails', JSON.stringify(emails));
         input.val('');
         renderEmails();
 
         // Write log
-        addLog('SYSTEM', `Added recipient email ID: ${emailVal}`);
+        addLog('SYSTEM', `Added recipient: ${emailVal} for [${bankVal}]`);
+
+        // Post to backend
+        $.ajax({
+            url: '/api/emails',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(newRecipient),
+            success: function(updatedList) {
+                if (Array.isArray(updatedList)) {
+                    emails = updatedList;
+                    localStorage.setItem('tms_automate_emails', JSON.stringify(emails));
+                    renderEmails();
+                }
+            },
+            error: function(xhr) {
+                console.warn('Backend add failed, fallback to local storage:', xhr.responseJSON || xhr.statusText);
+            }
+        });
     });
 
     // Delete Email ID handler (delegated)
@@ -226,7 +312,25 @@ $(document).ready(function () {
             emails.splice(index, 1);
             localStorage.setItem('tms_automate_emails', JSON.stringify(emails));
             renderEmails();
-            addLog('SYSTEM', `Removed recipient email ID: ${emailDeleted}`);
+            addLog('SYSTEM', `Removed recipient: ${emailDeleted.email} for [${emailDeleted.bank}]`);
+
+            // Send delete request to backend
+            $.ajax({
+                url: '/api/emails',
+                type: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify(emailDeleted),
+                success: function(updatedList) {
+                    if (Array.isArray(updatedList)) {
+                        emails = updatedList;
+                        localStorage.setItem('tms_automate_emails', JSON.stringify(emails));
+                        renderEmails();
+                    }
+                },
+                error: function(xhr) {
+                    console.warn('Backend delete failed, fallback to local storage:', xhr.responseJSON || xhr.statusText);
+                }
+            });
         }, 200);
     });
 
@@ -298,6 +402,475 @@ $(document).ready(function () {
 
     // 3. RUN SIMULATION FLOW
     let simTimeoutIds = [];
+    let currentModalDispatches = [];
+    let activeModalTabIndex = 0;
+
+    // Helper to compile CSV content by bank
+    function generateCSVText(bankName) {
+        let csv = "Delivery ID,Order ID,Bank,Courier Partner,AWB Number,Delivery Status,Estimated Delivery\n";
+        const cleanBank = bankName || "General";
+        if (cleanBank === "HDFC Bank") {
+            csv += "DEL90021,ORD77309,HDFC Bank,BlueDart,AWB998822,Delivered,2026-05-19\n";
+            csv += "DEL90022,ORD77310,HDFC Bank,Delhivery,AWB998823,In Transit,2026-05-21\n";
+        } else if (cleanBank === "SBI") {
+            csv += "DEL90023,ORD77311,SBI,Delhivery,AWB998824,Delivered,2026-05-20\n";
+            csv += "DEL90024,ORD77312,SBI,BlueDart,AWB998825,Delivered,2026-05-21\n";
+        } else if (cleanBank === "ICICI Bank") {
+            csv += "DEL90025,ORD77313,ICICI Bank,BlueDart,AWB998826,Delivered,2026-05-19\n";
+        } else {
+            csv += `DEL90026,ORD77314,${cleanBank},Delhivery,AWB998827,Delivered,2026-05-20\n`;
+        }
+        return csv;
+    }
+
+    // Helper: Generate and download demo CSV file
+    function downloadDemoFile(bankName, dateStr) {
+        const csvContent = generateCSVText(bankName);
+        const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
+        const link = document.createElement("a");
+        const bankFileSlug = bankName.toLowerCase().replace(/\s+/g, '_');
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${bankFileSlug}-${dateStr}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Render the active index content in mock email modal
+    function renderMockEmailContent(index) {
+        if (!currentModalDispatches || currentModalDispatches.length === 0 || !currentModalDispatches[index]) return;
+        
+        activeModalTabIndex = index;
+        const disp = currentModalDispatches[index];
+
+        $('#emailToDisplay').text(disp.recipientListStr);
+        $('#emailSubjectDisplay').text(disp.subject);
+        $('#emailBucketPathDisplay').text(disp.bucketPath);
+        $('#emailAttachmentNameDisplay').text(disp.csvFilename);
+        
+        const alertBox = $('#mockEmailModalOverlay').find('.alert');
+        
+        if (disp.sentInBackground) {
+            $('#mockEmailModalOverlay').find('.fs-6').text(`Background Email Dispatched (${disp.bank})`);
+            alertBox.removeClass('alert-info').addClass('alert-success').html(
+                `<i class="bi bi-check-circle-fill text-success fs-5 mt-0.5"></i>
+                 <div>
+                     <strong>Automated Dispatch Successful:</strong> The email has been sent successfully in the background to the configured recipients for <strong>${disp.bank}</strong> via ${disp.provider}.
+                     <br><span style="font-size: 0.78rem; opacity: 0.9;" class="d-block mt-1"><i class="bi bi-info-circle-fill"></i> <strong>Note:</strong> Free email endpoints (like Web3Forms/EmailJS free tier) do not support true file attachments. We have embedded the CSV report data as plain text and included a <strong>Direct Download Link</strong> in the email body so you can download the file directly from your email.</span>
+                 </div>`
+            );
+            $('#btnSendRealMail').hide();
+        } else {
+            $('#mockEmailModalOverlay').find('.fs-6').text(`Incoming Email Simulation (${disp.bank})`);
+            alertBox.removeClass('alert-success').addClass('alert-info').html(
+                `<i class="bi bi-info-circle-fill text-primary fs-5 mt-0.5"></i>
+                 <div>
+                     <strong>Simulation Sandbox:</strong> Since this is a frontend portal, automated background emails cannot be sent. You can download the generated report below, or click <strong>Draft Real Email</strong> to open your local mail client with the recipients pre-filled for <strong>${disp.bank}</strong>.
+                 </div>`
+            );
+            $('#btnSendRealMail').show();
+        }
+    }
+
+    // Set up mock tabs
+    function setupMockEmailTabs(dispatchesList) {
+        currentModalDispatches = dispatchesList;
+        activeModalTabIndex = 0;
+
+        const tabsContainer = $('#emailModalTabs');
+        tabsContainer.empty();
+
+        if (dispatchesList.length > 1) {
+            dispatchesList.forEach((disp, idx) => {
+                const isActive = idx === 0 ? 'active' : '';
+                const tabBtn = $(`
+                    <li class="nav-item">
+                        <button class="nav-link ${isActive}" data-index="${idx}">
+                            ${disp.bank}
+                        </button>
+                    </li>
+                `);
+                tabsContainer.append(tabBtn);
+            });
+            tabsContainer.show();
+        } else {
+            tabsContainer.hide();
+        }
+
+        renderMockEmailContent(0);
+        $('#mockEmailModalOverlay').css('display', 'flex');
+    }
+
+    function runClientOnlySimulation(btn, dateStr) {
+        addLog('SYSTEM', 'Running local client-only fallback simulation.');
+        // Get active banks from recipients list
+        let activeBanks = [];
+        if (emails.length > 0) {
+            const directBanks = [...new Set(emails.map(item => item.bank))].filter(b => b !== 'All Banks');
+            if (directBanks.length > 0) {
+                activeBanks = directBanks;
+            }
+            if (emails.some(item => item.bank === 'All Banks') || activeBanks.length === 0) {
+                if (!activeBanks.includes('HDFC Bank')) activeBanks.push('HDFC Bank');
+                if (!activeBanks.includes('SBI')) activeBanks.push('SBI');
+            }
+        } else {
+            activeBanks = ['HDFC Bank', 'SBI'];
+        }
+
+        // Clear existing timeouts if any
+        simTimeoutIds.forEach(clearTimeout);
+        simTimeoutIds = [];
+
+        // --- Step 1: Report Generation (12:00 AM Simulation) ---
+        addLog('SYSTEM', 'Initiating scheduled delivery report compilation (Simulated 12:00 AM Cron)...');
+        $('#step-generation').addClass('active');
+
+        let id = setTimeout(() => {
+            addLog('SYSTEM', `Gathered Courier Dispatch logs, Terminal AWB logs, and Delivery logs.`);
+            activeBanks.forEach(bank => {
+                const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
+                addLog('SUCCESS', `Successfully compiled daily delivery report sheet for [${bank}]. Filename: ${bankSlug}-${dateStr}.xlsx`);
+            });
+            $('#step-generation').removeClass('active').addClass('completed');
+            
+            // --- Step 2: Save to Bucket (GCS Upload Simulation) ---
+            addLog('SYSTEM', `Initiating Google Cloud Storage bucket upload...`);
+            $('#step-bucket').addClass('active');
+        }, 2000);
+        simTimeoutIds.push(id);
+
+        // Step 2 Details
+        id = setTimeout(() => {
+            addLog('GCS', `Authenticating with GCS bucket tms-delivery-bucket.`);
+            activeBanks.forEach(bank => {
+                const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
+                addLog('GCS', `Uploading report file: [reports/${bankSlug}-${dateStr}.xlsx]`);
+            });
+            addLog('SUCCESS', `All compiled reports uploaded and archived successfully.`);
+            $('#step-bucket').removeClass('active').addClass('completed');
+
+            // --- Step 3: Extract from Bucket (Simulated 9:00 AM Cron) ---
+            addLog('SYSTEM', `Initiating automated email dispatch queue (Simulated 9:00 AM Cron)...`);
+            $('#step-extraction').addClass('active');
+        }, 4500);
+        simTimeoutIds.push(id);
+
+        // Step 3 Details
+        id = setTimeout(() => {
+            addLog('EMAIL', `Resolving configured email recipient IDs bank-wise...`);
+            
+            if (emails.length === 0) {
+                addLog('SYSTEM', `WARNING: No emails configured! Aborting email dispatch.`);
+                $('#step-extraction').removeClass('active');
+                $('#step-email').removeClass('active');
+                btn.prop('disabled', false);
+                return;
+            }
+
+            let resolvedCount = 0;
+            activeBanks.forEach(bank => {
+                const bankRecipients = [...new Set(emails.filter(item => item.bank === bank || item.bank === 'All Banks').map(item => item.email))];
+                if (bankRecipients.length > 0) {
+                    addLog('EMAIL', `Resolved recipients for [${bank}]: [${bankRecipients.join(', ')}]`);
+                    resolvedCount++;
+                } else {
+                    addLog('EMAIL', `No recipients resolved for [${bank}]. Skipping report email.`);
+                }
+            });
+
+            if (resolvedCount === 0) {
+                addLog('SYSTEM', `WARNING: No active recipients resolved for compiled banks! Aborting email dispatch.`);
+                $('#step-extraction').removeClass('active');
+                $('#step-email').removeClass('active');
+                btn.prop('disabled', false);
+                return;
+            }
+
+            addLog('EMAIL', `Connecting to GCS bucket endpoint, pulling active reports.`);
+            $('#step-extraction').removeClass('active').addClass('completed');
+
+            // --- Step 4: Dispatch Email ---
+            addLog('EMAIL', `Sending automated bank-wise messages to resolved recipients...`);
+            $('#step-email').addClass('active');
+        }, 7000);
+        simTimeoutIds.push(id);
+
+        // Step 4 Details & Final Success
+        id = setTimeout(() => {
+            const dispatches = [];
+
+            // Compile dispatch info for each active bank
+            activeBanks.forEach(bank => {
+                const bankRecipients = emails.filter(item => item.bank === bank || item.bank === 'All Banks');
+                if (bankRecipients.length === 0) return;
+
+                const recipientEmails = [...new Set(bankRecipients.map(item => item.email))];
+                const recipientListStr = recipientEmails.join(', ');
+                const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
+                const filename = `${bankSlug}-${dateStr}.xlsx`;
+                const bucketPath = `gs://tms-delivery-bucket/reports/${filename}`;
+                const downloadUrl = window.location.href.split('?')[0] + '?download=' + bankSlug + '-' + dateStr;
+                const csvData = generateCSVText(bank);
+                const emailSubject = `Daily Delivery Report: ${bank} - ${dateStr}`;
+                
+                dispatches.push({
+                    bank: bank,
+                    recipients: recipientEmails,
+                    recipientListStr: recipientListStr,
+                    subject: emailSubject,
+                    filename: filename,
+                    csvFilename: `${bankSlug}-${dateStr}.csv`,
+                    bucketPath: bucketPath,
+                    downloadUrl: downloadUrl,
+                    csvData: csvData,
+                    message: `Dear Operations Team,\n\n` +
+                        `The daily scheduled Terminal Delivery Status report for ${bank} has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
+                        `Bucket Location:\n${bucketPath}\n\n` +
+                        `-----------------------------------------\n` +
+                        `REPORT DATA (CSV FORMAT):\n` +
+                        `-----------------------------------------\n` +
+                        `${csvData}\n` +
+                        `-----------------------------------------\n\n` +
+                        `Direct Download Link (Click to automatically download the CSV file):\n` +
+                        `${downloadUrl}\n\n` +
+                        `Recipients: ${recipientListStr}\n\n` +
+                        `Best Regards,\n` +
+                        `iSupayX Terminal Automator`
+                });
+            });
+
+            if (dispatches.length === 0) {
+                addLog('SYSTEM', 'No dispatches were generated.');
+                $('#step-email').removeClass('active');
+                btn.prop('disabled', false);
+                return;
+            }
+
+            let currentDispatchIndex = 0;
+
+            function sendNext() {
+                if (currentDispatchIndex >= dispatches.length) {
+                    completeAllDispatches(dispatches);
+                    return;
+                }
+
+                const dispatchObj = dispatches[currentDispatchIndex];
+                addLog('EMAIL', `[${dispatchObj.bank}] Dispatching automated email to: ${dispatchObj.recipientListStr}...`);
+
+                if (emailConfig.enabled) {
+                    if (emailConfig.provider === 'web3forms' && emailConfig.web3FormsKey) {
+                        addLog('EMAIL', `[${dispatchObj.bank}] Attempting background email transmission via Web3Forms...`);
+                        
+                        const blob = new Blob([dispatchObj.csvData], { type: 'text/csv' });
+                        const file = new File([blob], dispatchObj.csvFilename, { type: 'text/csv' });
+
+                        const formData = new FormData();
+                        formData.append('access_key', emailConfig.web3FormsKey);
+                        formData.append('subject', dispatchObj.subject);
+                        formData.append('from_name', 'iSupayX Terminal Automator');
+                        formData.append('message', dispatchObj.message);
+                        formData.append('attachment', file);
+
+                        fetch('https://api.web3forms.com/submit', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                addLog('SUCCESS', `[${dispatchObj.bank}] Email sent successfully via Web3Forms (with attachment)!`);
+                                dispatchObj.sentInBackground = true;
+                                dispatchObj.provider = 'Web3Forms';
+                            } else {
+                                addLog('SYSTEM', `[${dispatchObj.bank}] WARNING: Web3Forms failed: ${data.message || 'Unknown error'}`);
+                                dispatchObj.sentInBackground = false;
+                            }
+                            currentDispatchIndex++;
+                            setTimeout(sendNext, 1000);
+                        })
+                        .catch(error => {
+                            addLog('SYSTEM', `[${dispatchObj.bank}] ERROR: Web3Forms API failed: ${error.message || error}`);
+                            dispatchObj.sentInBackground = false;
+                            currentDispatchIndex++;
+                            setTimeout(sendNext, 1000);
+                        });
+
+                    } else if (emailConfig.provider === 'emailjs' && emailConfig.emailJSPublicKey && emailConfig.emailJSServiceID && emailConfig.emailJSTemplateID) {
+                        addLog('EMAIL', `[${dispatchObj.bank}] Attempting background email transmission via EmailJS...`);
+                        
+                        emailjs.send(emailConfig.emailJSServiceID, emailConfig.emailJSTemplateID, {
+                            to_email: dispatchObj.recipientListStr,
+                            subject: dispatchObj.subject,
+                            bucket_path: dispatchObj.bucketPath,
+                            date: dateStr
+                        })
+                        .then(function(response) {
+                            addLog('SUCCESS', `[${dispatchObj.bank}] Email sent successfully via EmailJS!`);
+                            dispatchObj.sentInBackground = true;
+                            dispatchObj.provider = 'EmailJS';
+                            currentDispatchIndex++;
+                            setTimeout(sendNext, 1000);
+                        }, function(error) {
+                            addLog('SYSTEM', `[${dispatchObj.bank}] ERROR: EmailJS failed: ${JSON.stringify(error)}`);
+                            dispatchObj.sentInBackground = false;
+                            currentDispatchIndex++;
+                            setTimeout(sendNext, 1000);
+                        });
+                    } else {
+                        addLog('EMAIL', `[${dispatchObj.bank}] MIME email successfully generated and queued for SMTP transport.`);
+                        addLog('SUCCESS', `[${dispatchObj.bank}] Automated email dispatched successfully to: ${dispatchObj.recipientListStr}`);
+                        dispatchObj.sentInBackground = false;
+                        currentDispatchIndex++;
+                        setTimeout(sendNext, 500);
+                    }
+                } else {
+                    addLog('EMAIL', `[${dispatchObj.bank}] MIME email successfully generated and queued for SMTP transport.`);
+                    addLog('SUCCESS', `[${dispatchObj.bank}] Automated email dispatched successfully to: ${dispatchObj.recipientListStr}`);
+                    dispatchObj.sentInBackground = false;
+                    currentDispatchIndex++;
+                    setTimeout(sendNext, 500);
+                }
+            }
+
+            sendNext();
+
+            function completeAllDispatches(dispatchesList) {
+                $('#step-email').removeClass('active').addClass('completed');
+                addLog('SYSTEM', `Daily scheduler process completed successfully for all banks.`);
+                
+                const toast = $('#simToast');
+                toast.addClass('show');
+                setTimeout(() => {
+                    toast.removeClass('show');
+                }, 4000);
+
+                if (dispatchesList.length > 0) {
+                    downloadDemoFile(dispatchesList[0].bank, dateStr);
+                    addLog('SYSTEM', `Auto-downloaded demo file [${dispatchesList[0].csvFilename}] locally to simulate mail attachment.`);
+                }
+
+                setupMockEmailTabs(dispatchesList);
+                btn.prop('disabled', false);
+            }
+        }, 9500);
+        simTimeoutIds.push(id);
+    }
+
+    function runServerSimulation(btn, response, dateStr) {
+        const logsList = response.logs || [];
+        const dispatchesList = response.dispatches || [];
+
+        // Clear existing timeouts if any
+        simTimeoutIds.forEach(clearTimeout);
+        simTimeoutIds = [];
+
+        // Reset timeline UI
+        $('.sim-step').removeClass('active completed');
+
+        // Group logs into the four main timeline phases
+        const phase1Logs = [];
+        const phase2Logs = [];
+        const phase3Logs = [];
+        const phase4Logs = [];
+
+        let currentPhase = 1;
+        logsList.forEach(log => {
+            const msg = log.msg;
+            if (msg.includes('Initiating Google Cloud Storage')) {
+                currentPhase = 2;
+            } else if (msg.includes('Initiating automated email dispatch')) {
+                currentPhase = 3;
+            } else if (msg.includes('[') && (msg.includes('Dispatching') || msg.includes('Attempting') || msg.includes('EmailJS') || msg.includes('SMTP') || msg.includes('Email sent') || msg.includes('Mock email') || msg.includes('WARNING') || msg.includes('ERROR'))) {
+                currentPhase = 4;
+            }
+
+            if (currentPhase === 1) phase1Logs.push(log);
+            else if (currentPhase === 2) phase2Logs.push(log);
+            else if (currentPhase === 3) phase3Logs.push(log);
+            else phase4Logs.push(log);
+        });
+
+        // --- Step 1: Report Generation (0s) ---
+        addLog('SYSTEM', 'Running server-side automated scheduler simulation.');
+        $('#step-generation').addClass('active');
+        phase1Logs.forEach(log => {
+            addLog(log.tag, log.msg);
+        });
+
+        // --- Step 2: Save to Bucket (2.0s) ---
+        let id = setTimeout(() => {
+            $('#step-generation').removeClass('active').addClass('completed');
+            $('#step-bucket').addClass('active');
+            phase2Logs.forEach(log => {
+                addLog(log.tag, log.msg);
+            });
+        }, 2000);
+        simTimeoutIds.push(id);
+
+        // --- Step 3: Extract from Bucket (4.5s) ---
+        id = setTimeout(() => {
+            $('#step-bucket').removeClass('active').addClass('completed');
+            $('#step-extraction').addClass('active');
+            phase3Logs.forEach(log => {
+                addLog(log.tag, log.msg);
+            });
+        }, 4500);
+        simTimeoutIds.push(id);
+
+        // --- Step 4: Dispatch Email (7.0s) ---
+        id = setTimeout(() => {
+            $('#step-extraction').removeClass('active').addClass('completed');
+            $('#step-email').addClass('active');
+            addLog('EMAIL', `Sending automated bank-wise messages to resolved recipients...`);
+        }, 7000);
+        simTimeoutIds.push(id);
+
+        // Stagger phase 4 logs starting from 7.5s
+        const dispatchLogs = phase4Logs.filter(log => !log.msg.includes('Sending automated bank-wise messages'));
+        if (dispatchLogs.length > 0) {
+            dispatchLogs.forEach((log, index) => {
+                id = setTimeout(() => {
+                    addLog(log.tag, log.msg);
+                }, 7500 + index * 500); // 500ms stagger between each log
+                simTimeoutIds.push(id);
+            });
+
+            // Completion timeout
+            const totalDuration = Math.max(9500, 7500 + dispatchLogs.length * 500 + 500);
+            id = setTimeout(() => {
+                completeAllDispatches(dispatchesList);
+            }, totalDuration);
+            simTimeoutIds.push(id);
+        } else {
+            id = setTimeout(() => {
+                completeAllDispatches(dispatchesList);
+            }, 9500);
+            simTimeoutIds.push(id);
+        }
+
+        function completeAllDispatches(dispatchesList) {
+            $('#step-email').removeClass('active').addClass('completed');
+            addLog('SYSTEM', `Daily scheduler process completed successfully for all banks.`);
+            
+            const toast = $('#simToast');
+            toast.addClass('show');
+            setTimeout(() => {
+                toast.removeClass('show');
+            }, 4000);
+
+            if (dispatchesList.length > 0) {
+                downloadDemoFile(dispatchesList[0].bank, dateStr);
+                addLog('SYSTEM', `Auto-downloaded demo file [${dispatchesList[0].csvFilename}] locally to simulate mail attachment.`);
+            }
+
+            setupMockEmailTabs(dispatchesList);
+            btn.prop('disabled', false);
+        }
+    }
 
     $('#btnStartSim').on('click', function () {
         const btn = $(this);
@@ -310,274 +883,71 @@ $(document).ready(function () {
         const dateStr = now.getFullYear() + '-' + 
             String(now.getMonth() + 1).padStart(2, '0') + '-' + 
             String(now.getDate()).padStart(2, '0');
-        
-        const filename = `firstbank-${dateStr}.xlsx`;
-        const bucketPath = `gs://tms-delivery-bucket/reports/${filename}`;
-
-        // Get recipients list string
-        const recipientListStr = emails.length > 0 ? emails.join(', ') : 'No configured email recipients';
 
         // Clear existing timeouts if any
         simTimeoutIds.forEach(clearTimeout);
         simTimeoutIds = [];
 
-        // --- Step 1: Report Generation (12:00 AM Simulation) ---
-        addLog('SYSTEM', 'Initiating scheduled delivery report compilation (Simulated 12:00 AM Cron)...');
-        $('#step-generation').addClass('active');
-
-        // Step 1 Details
-        let id = setTimeout(() => {
-            addLog('SYSTEM', `Gathered Courier Dispatch logs, Terminal AWB logs, and Delivery logs.`);
-            addLog('SUCCESS', `Successfully compiled daily delivery report sheet. Filename: ${filename}`);
-            $('#step-generation').removeClass('active').addClass('completed');
-            
-            // --- Step 2: Save to Bucket (GCS Upload Simulation) ---
-            addLog('SYSTEM', `Initiating Google Cloud Storage bucket upload...`);
-            $('#step-bucket').addClass('active');
-        }, 2000);
-        simTimeoutIds.push(id);
-
-        // Step 2 Details
-        id = setTimeout(() => {
-            addLog('GCS', `Authenticating with GCS bucket tms-delivery-bucket.`);
-            addLog('GCS', `Uploading directory files: [reports/${filename}]`);
-            addLog('SUCCESS', `Delivery report uploaded & archived at: ${bucketPath}`);
-            $('#step-bucket').removeClass('active').addClass('completed');
-
-            // --- Step 3: Extract from Bucket (Simulated 9:00 AM Cron) ---
-            addLog('SYSTEM', `Initiating automated email dispatch queue (Simulated 9:00 AM Cron)...`);
-            $('#step-extraction').addClass('active');
-        }, 4500);
-        simTimeoutIds.push(id);
-
-        // Step 3 Details
-        id = setTimeout(() => {
-            addLog('EMAIL', `Resolving configured email recipient IDs...`);
-            addLog('EMAIL', `Recipients configured: [${recipientListStr}]`);
-            
-            if (emails.length === 0) {
-                addLog('SYSTEM', `WARNING: No emails configured! Aborting email dispatch.`);
-                $('#step-extraction').removeClass('active');
-                $('#step-email').removeClass('active');
-                btn.prop('disabled', false);
-                return;
+        addLog('SYSTEM', 'Connecting to Vercel backend simulation API...');
+        
+        $.ajax({
+            url: '/api/simulate',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                emails: emails,
+                emailConfig: emailConfig,
+                origin: window.location.origin
+            }),
+            timeout: 10000,
+            success: function(response) {
+                runServerSimulation(btn, response, dateStr);
+            },
+            error: function(xhr, status, err) {
+                console.warn('Backend simulation failed, running client fallback:', err || status);
+                runClientOnlySimulation(btn, dateStr);
             }
-
-            addLog('EMAIL', `Connecting to GCS bucket endpoint, pulling file: ${bucketPath}`);
-            addLog('EMAIL', `Successfully fetched and compiled attachment content (firstbank-${dateStr}.xlsx).`);
-            $('#step-extraction').removeClass('active').addClass('completed');
-
-            // --- Step 4: Dispatch Email ---
-            addLog('EMAIL', `Sending automated message containing delivery report data to ${emails.length} recipients...`);
-            $('#step-email').addClass('active');
-        }, 7000);
-        simTimeoutIds.push(id);
-
-        // Step 4 Details & Final Success
-        id = setTimeout(() => {
-            if (emailConfig.enabled) {
-                if (emailConfig.provider === 'web3forms' && emailConfig.web3FormsKey) {
-                    addLog('EMAIL', `Attempting background email transmission via Web3Forms...`);
-                    
-                    const downloadUrl = window.location.href.split('?')[0] + '?download=firstbank-' + dateStr;
-                    const csvData = generateCSVText();
-                    
-                    const emailSubject = `Daily Delivery Report: firstbank-${dateStr}`;
-                    const emailMessage = `Dear Operations Team,\n\n` +
-                        `The daily scheduled Terminal Delivery Status report has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
-                        `Bucket Location:\n${bucketPath}\n\n` +
-                        `-----------------------------------------\n` +
-                        `REPORT DATA (CSV FORMAT):\n` +
-                        `-----------------------------------------\n` +
-                        `${csvData}\n` +
-                        `-----------------------------------------\n\n` +
-                        `Direct Download Link (Click to automatically download the CSV file):\n` +
-                        `${downloadUrl}\n\n` +
-                        `Recipients: ${recipientListStr}\n\n` +
-                        `Best Regards,\n` +
-                        `iSupayX Terminal Automator`;
-
-                    // Create CSV attachment
-                    const csvContent = generateCSVText();
-                    const blob = new Blob([csvContent], { type: 'text/csv' });
-                    const file = new File([blob], `firstbank-${dateStr}.csv`, { type: 'text/csv' });
-
-                    // Create FormData with attachment
-                    const formData = new FormData();
-                    formData.append('access_key', emailConfig.web3FormsKey);
-                    formData.append('subject', emailSubject);
-                    formData.append('from_name', 'iSupayX Terminal Automator');
-                    formData.append('message', emailMessage);
-                    formData.append('attachment', file);
-
-                    fetch('https://api.web3forms.com/submit', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            addLog('SUCCESS', `Email sent successfully in background via Web3Forms (with attachment)!`);
-                            completeDispatch(true, 'Web3Forms');
-                        } else {
-                            addLog('SYSTEM', `ERROR: Web3Forms background transmission failed: ${data.message || 'Unknown error'}`);
-                            addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
-                            completeDispatch(false);
-                        }
-                    })
-                    .catch(error => {
-                        addLog('SYSTEM', `ERROR: Web3Forms API fetch request failed: ${error.message || error}`);
-                        addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
-                        completeDispatch(false);
-                    });
-
-                } else if (emailConfig.provider === 'emailjs' && emailConfig.emailJSPublicKey && emailConfig.emailJSServiceID && emailConfig.emailJSTemplateID) {
-                    addLog('EMAIL', `Attempting background email transmission via EmailJS...`);
-                    
-                    emailjs.send(emailConfig.emailJSServiceID, emailConfig.emailJSTemplateID, {
-                        to_email: recipientListStr,
-                        subject: `Daily Delivery Report: firstbank-${dateStr}`,
-                        bucket_path: bucketPath,
-                        date: dateStr
-                    })
-                    .then(function(response) {
-                        addLog('SUCCESS', `Email sent successfully in background via EmailJS! (Response Status: ${response.status})`);
-                        completeDispatch(true, 'EmailJS');
-                    }, function(error) {
-                        addLog('SYSTEM', `ERROR: EmailJS background transmission failed: ${JSON.stringify(error)}`);
-                        addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
-                        completeDispatch(false);
-                    });
-                } else {
-                    addLog('EMAIL', `MIME email successfully generated and queued for SMTP transport.`);
-                    addLog('SUCCESS', `Automated email dispatched successfully to: ${recipientListStr}`);
-                    completeDispatch(false);
-                }
-            } else {
-                addLog('EMAIL', `MIME email successfully generated and queued for SMTP transport.`);
-                addLog('SUCCESS', `Automated email dispatched successfully to: ${recipientListStr}`);
-                completeDispatch(false);
-            }
-
-            function completeDispatch(isSentInBackground, providerName) {
-                $('#step-email').removeClass('active').addClass('completed');
-                addLog('SYSTEM', `Daily scheduler process completed successfully.`);
-                
-                // Show Success Toast
-                const toast = $('#simToast');
-                toast.addClass('show');
-                setTimeout(() => {
-                    toast.removeClass('show');
-                }, 4000);
-
-                // Populate and Show Mock Email Modal
-                $('#emailToDisplay').text(recipientListStr);
-                $('#emailSubjectDisplay').text(`Daily Delivery Report: firstbank-${dateStr}`);
-                $('#emailBucketPathDisplay').text(`gs://tms-delivery-bucket/reports/firstbank-${dateStr}.xlsx`);
-                $('#emailAttachmentNameDisplay').text(`firstbank-${dateStr}.csv`);
-                
-                // Trigger automatic demofile download for verification
-                downloadDemoFile(dateStr);
-                addLog('SYSTEM', `Auto-downloaded demo file [firstbank-${dateStr}.csv] locally to simulate mail attachment.`);
-
-                // Show modal (with visual state based on whether real background send occurred)
-                if (isSentInBackground) {
-                    // Update header text to signify it actually sent
-                    $('#mockEmailModalOverlay').find('.fs-6').text('Background Email Dispatched (Success)');
-                    $('#mockEmailModalOverlay').find('.alert-info').removeClass('alert-info').addClass('alert-success').html(
-                        `<i class="bi bi-check-circle-fill text-success fs-5 mt-0.5"></i>
-                         <div>
-                             <strong>Automated Dispatch Successful:</strong> The email has been sent successfully in the background to the configured recipients via ${providerName}.
-                             <br><span style="font-size: 0.78rem; opacity: 0.9;" class="d-block mt-1"><i class="bi bi-info-circle-fill"></i> <strong>Note:</strong> Free email endpoints (like Web3Forms/EmailJS free tier) do not support true file attachments. We have embedded the CSV report data as plain text and included a <strong>Direct Download Link</strong> in the email body so you can download the file directly from your email.</span>
-                         </div>`
-                    );
-                    $('#btnSendRealMail').hide(); // Hide draft button since it's already sent
-                } else {
-                    $('#mockEmailModalOverlay').find('.fs-6').text('Incoming Email Simulation');
-                    // Reset modal styles/alert
-                    $('#mockEmailModalOverlay').find('.alert-success').removeClass('alert-success').addClass('alert-info').html(
-                        `<i class="bi bi-info-circle-fill text-primary fs-5 mt-0.5"></i>
-                         <div>
-                             <strong>Simulation Sandbox:</strong> Since this is a frontend portal, automated background emails cannot be sent. You can download the generated report below, or click <strong>Draft Real Email</strong> to open your local mail client with the recipients pre-filled.
-                         </div>`
-                    );
-                    $('#btnSendRealMail').show();
-                }
-
-                $('#mockEmailModalOverlay').css('display', 'flex');
-                btn.prop('disabled', false);
-            }
-        }, 9500);
-        simTimeoutIds.push(id);
+        });
     });
-
-    // Helper to compile CSV content
-    function generateCSVText() {
-        let csv = "Delivery ID,Order ID,Bank,Courier Partner,AWB Number,Delivery Status,Estimated Delivery\n";
-        csv += "DEL90021,ORD77309,FirstBank,BlueDart,AWB998822,Delivered,2026-05-19\n";
-        csv += "DEL90022,ORD77310,FirstBank,Delhivery,AWB998823,In Transit,2026-05-21\n";
-        csv += "DEL90023,ORD77311,FirstBank,Delhivery,AWB998824,Delivered,2026-05-20\n";
-        return csv;
-    }
-
-    // Helper: Generate and download demo CSV file
-    function downloadDemoFile(dateStr) {
-        const csvContent = "data:text/csv;charset=utf-8," + generateCSVText();
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `firstbank-${dateStr}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
 
     // Modal click bindings
     $('#btnCloseEmailModal, #btnDismissEmailModal').on('click', function () {
         $('#mockEmailModalOverlay').hide();
     });
 
-    $('#btnDownloadEmailAttachment').on('click', function () {
+    // Tab switcher handler
+    $(document).on('click', '#emailModalTabs .nav-link', function () {
+        $('#emailModalTabs .nav-link').removeClass('active');
+        $(this).addClass('active');
+        const index = $(this).data('index');
+        renderMockEmailContent(index);
+    });
+
+    $(document).on('click', '#btnDownloadEmailAttachment', function () {
         const now = new Date();
         const dateStr = now.getFullYear() + '-' + 
             String(now.getMonth() + 1).padStart(2, '0') + '-' + 
             String(now.getDate()).padStart(2, '0');
-        downloadDemoFile(dateStr);
+        if (currentModalDispatches && currentModalDispatches[activeModalTabIndex]) {
+            const disp = currentModalDispatches[activeModalTabIndex];
+            downloadDemoFile(disp.bank, dateStr);
+        } else {
+            downloadDemoFile('HDFC Bank', dateStr);
+        }
     });
 
     $('#btnSendRealMail').on('click', function () {
-        if (emails.length === 0) {
-            alert('No recipients configured to draft email.');
+        if (!currentModalDispatches || currentModalDispatches.length === 0 || !currentModalDispatches[activeModalTabIndex]) {
+            alert('No active email loaded to draft.');
             return;
         }
-        const recipientList = emails.join(',');
-        const now = new Date();
-        const dateStr = now.getFullYear() + '-' + 
-            String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-            String(now.getDate()).padStart(2, '0');
-        const downloadUrl = window.location.href.split('?')[0] + '?download=firstbank-' + dateStr;
-        const csvData = generateCSVText();
-        const subject = encodeURIComponent(`Daily Delivery Report: firstbank-${dateStr}`);
-        const body = encodeURIComponent(
-            `Dear Operations Team,\n\n` +
-            `The daily scheduled Terminal Delivery Status report has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
-            `Bucket Location:\n` +
-            `gs://tms-delivery-bucket/reports/firstbank-${dateStr}.xlsx\n\n` +
-            `-----------------------------------------\n` +
-            `REPORT DATA (CSV FORMAT):\n` +
-            `-----------------------------------------\n` +
-            `${csvData}\n` +
-            `-----------------------------------------\n\n` +
-            `Direct Download Link (Click to automatically download the CSV file):\n` +
-            `${downloadUrl}\n\n` +
-            `Best Regards,\n` +
-            `iSupayX Terminal Automator`
-        );
+        const disp = currentModalDispatches[activeModalTabIndex];
+        const recipientList = disp.recipients.join(',');
+        const subject = encodeURIComponent(disp.subject);
+        const body = encodeURIComponent(disp.message);
+        
         window.location.href = `mailto:${recipientList}?subject=${subject}&body=${body}`;
-        addLog('EMAIL', `Opened local mail client to draft email to: [${emails.join(', ')}]`);
+        addLog('EMAIL', `Opened local mail client to draft email for [${disp.bank}] to: [${recipientList}]`);
     });
 
     // Initialize Page
@@ -587,28 +957,30 @@ $(document).ready(function () {
     loadLogs();
     renderLogs();
 
-    // Check for auto-download parameter in URL (Workaround for free email service providers)
+    // Check for auto-download parameter in URL
     const urlParams = new URLSearchParams(window.location.search);
     const downloadParam = urlParams.get('download');
     if (downloadParam) {
-        // Extract date from download param: firstbank-YYYY-MM-DD
-        let dateStr = downloadParam.replace('firstbank-', '');
-        // Validate date format (YYYY-MM-DD)
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-            setTimeout(() => {
-                downloadDemoFile(dateStr);
-                addLog('SYSTEM', `Auto-downloaded report file for date: ${dateStr} (triggered via email download link)`);
-            }, 1000); // Small timeout to ensure page and logs are fully loaded/rendered
-        } else {
-            // Fallback: use current date
-            const now = new Date();
-            const fallbackDate = now.getFullYear() + '-' + 
-                String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                String(now.getDate()).padStart(2, '0');
-            setTimeout(() => {
-                downloadDemoFile(fallbackDate);
-                addLog('SYSTEM', `Auto-downloaded report file for current date (invalid URL parameter format)`);
-            }, 1000);
+        const lastHyphenIndex = downloadParam.lastIndexOf('-');
+        if (lastHyphenIndex !== -1) {
+            const dateStr = downloadParam.substring(lastHyphenIndex + 1);
+            const bankSlug = downloadParam.substring(0, lastHyphenIndex);
+            
+            let bankName = "All Banks";
+            if (bankSlug === "hdfc_bank") bankName = "HDFC Bank";
+            else if (bankSlug === "icici_bank") bankName = "ICICI Bank";
+            else if (bankSlug === "axis_bank") bankName = "Axis Bank";
+            else if (bankSlug === "sbi") bankName = "SBI";
+            else if (bankSlug === "yes_bank") bankName = "Yes Bank";
+            else if (bankSlug === "kotak_bank") bankName = "Kotak Bank";
+            else bankName = bankSlug; // fallback
+            
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                setTimeout(() => {
+                    downloadDemoFile(bankName, dateStr);
+                    addLog('SYSTEM', `Auto-downloaded report file for ${bankName} date: ${dateStr} (triggered via email download link)`);
+                }, 1000);
+            }
         }
     }
 });
