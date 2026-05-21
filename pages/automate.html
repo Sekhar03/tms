@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automate Mail - ISU Admin Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Style for Automate Mail Page -->
+    <link href="../css/automate.css?v=2" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="isu-header d-flex justify-content-between align-items-center px-3">
+        <div class="header-left d-flex align-items-center">
+            <div class="isu-logo-circle d-flex align-items-center justify-content-center">
+                <span class="isu-logo-text">isu</span>
+            </div>
+            <span class="isu-brand-name ms-2">Iserveu</span>
+            <button class="btn sidebar-toggle-btn text-white ms-3" type="button" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <div class="header-right d-flex align-items-center gap-3">
+            <div class="wallet-badge text-white d-flex align-items-center gap-2">
+                <i class="bi bi-wallet2"></i>
+                <span>W1: ₹56,976,869.51</span>
+            </div>
+            <div class="wallet-badge text-white d-flex align-items-center gap-2">
+                <i class="bi bi-wallet2"></i>
+                <span>W2: ₹0.00</span>
+            </div>
+            <div class="user-dropdown dropdown">
+                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center gap-2 px-3 py-1 text-white border-0 rounded-pill" style="background: rgba(255,255,255,0.15);" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle"></i>
+                    <span>COMMON ADMIN</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+            <button class="btn settings-btn text-white p-0" type="button" aria-label="Settings">
+                <i class="bi bi-gear-fill"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="isu-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="isu-sidebar text-white">
+            <div class="sidebar-header">
+                <span class="sidebar-title">NAVIGATION</span>
+            </div>
+            <ul class="nav flex-column sidebar-nav">
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item" id="sidebar-dashboard-link">
+                        <i class="bi bi-speedometer2 nav-icon"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item" id="sidebar-reports-link">
+                        <i class="bi bi-file-earmark-text nav-icon"></i>
+                        <span class="nav-text">Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-cash nav-icon"></i>
+                        <span class="nav-text">Finance Function</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-people nav-icon"></i>
+                        <span class="nav-text">Client User Mgmt.</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-people nav-icon"></i>
+                        <span class="nav-text">Internal User Mgmt.</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-headset nav-icon"></i>
+                        <span class="nav-text">Support Function</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-shield-check nav-icon"></i>
+                        <span class="nav-text">FRM</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-sliders nav-icon"></i>
+                        <span class="nav-text">Centralize Ops</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-person-plus nav-icon"></i>
+                            <span class="nav-text">Common Onboarding</span>
+                        </div>
+                        <i class="bi bi-chevron-right chevron-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-percent nav-icon"></i>
+                        <span class="nav-text">Commission Setting</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled-sidebar-item">
+                        <i class="bi bi-search nav-icon"></i>
+                        <span class="nav-text">Audit Trail</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tms.html" class="nav-link active" id="sidebar-tms-link">
+                        <i class="bi bi-volume-up nav-icon"></i>
+                        <span class="nav-text">TMS</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="isu-main-content">
+            <div class="custom-card-container">
+                <!-- Teal Header Bar inside card -->
+                <div class="custom-card-header d-flex align-items-center justify-content-between position-relative">
+                    <a href="tms.html" class="back-circle-btn d-flex align-items-center justify-content-center" title="Back to TMS">
+                        <i class="bi bi-chevron-left text-white fs-5" style="font-weight: 800;"></i>
+                    </a>
+                    <h2 class="custom-card-title m-0 text-white fw-bold mx-auto text-center position-absolute start-50 translate-middle-x">
+                        Automate Mail Configuration
+                    </h2>
+                    <div style="width: 34px;"></div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="custom-card-body p-4 p-md-5">
+                    <div class="row g-4">
+                        
+                        <!-- Left Column: Recipients List & Rules -->
+                        <div class="col-12 col-lg-7">
+                            
+                            <!-- Email Recipients Box -->
+                            <div class="section-card mb-4">
+                                <h3 class="section-title">
+                                    <i class="bi bi-people-fill text-teal"></i> Email Recipients
+                                </h3>
+                                
+                                <form id="emailAddForm" class="mb-4" novalidate>
+                                    <label for="emailInput" class="custom-form-label fw-semibold mb-2">Add Recipient Email Address</label>
+                                    <div class="input-group custom-input-group">
+                                        <span class="input-group-text bg-white border-0 text-muted"><i class="bi bi-envelope-plus"></i></span>
+                                        <input type="email" id="emailInput" class="form-control" placeholder="example@domain.com" required>
+                                        <button class="btn btn-add-email" type="submit">Add Recipient</button>
+                                    </div>
+                                    <div class="text-danger small mt-1 d-none" id="emailError">Please enter a valid email.</div>
+                                </form>
+
+                                <label class="custom-form-label fw-semibold mb-2">Configured Email IDs</label>
+                                <div class="emails-list-container border rounded p-3 bg-light" id="emailsContainer">
+                                    <!-- Rendered dynamically by automate.js -->
+                                </div>
+                            </div>
+
+                            <!-- Rules and Schedules Card -->
+                            <div class="section-card">
+                                <h3 class="section-title">
+                                    <i class="bi bi-clock-history text-teal"></i> Automation Rules & Schedules
+                                </h3>
+                                
+                                <!-- Rule 1 -->
+                                <div class="schedule-rule-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-dark-blue" style="font-size: 0.95rem;">1. Daily Delivery Report Generation</span>
+                                        <span class="rule-time">12:00 AM</span>
+                                    </div>
+                                    <p class="m-0 fs-7 text-secondary">
+                                        Generates a delivery status report for courier dispatches and uploads it to the archive storage bucket.
+                                    </p>
+                                    <div class="rule-meta mt-2 d-flex align-items-center gap-2">
+                                        <span class="status-dot-pulse"></span>
+                                        <span>Status: <strong>Active Scheduler</strong></span>
+                                        <span class="text-muted">|</span>
+                                        <span>Format: <code>firstbank-YYYY-MM-DD.xlsx</code></span>
+                                    </div>
+                                </div>
+
+                                <!-- Rule 2 -->
+                                <div class="schedule-rule-box m-0">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-dark-blue" style="font-size: 0.95rem;">2. Daily Email Report Dispatch</span>
+                                        <span class="rule-time">09:00 AM</span>
+                                    </div>
+                                    <p class="m-0 fs-7 text-secondary">
+                                        Extracts the compiled delivery report sheet from the storage bucket and emails it to all configured recipients.
+                                    </p>
+                                    <div class="rule-meta mt-2 d-flex align-items-center gap-2">
+                                        <span class="status-dot-pulse"></span>
+                                        <span>Status: <strong>Active Dispatcher</strong></span>
+                                        <span class="text-muted">|</span>
+                                        <span>Source: <code>gs://tms-delivery-bucket/reports/</code></span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Interactive Simulation Console -->
+                        <div class="col-12 col-lg-5">
+                            <div class="section-card h-100 d-flex flex-column">
+                                <h3 class="section-title">
+                                    <i class="bi bi-terminal-fill text-teal"></i> Scheduler Simulator
+                                </h3>
+                                
+                                <p class="fs-7 text-muted mb-4">
+                                    Use the simulator to dry-run the 12:00 AM report compiler and 9:00 AM dispatch automation scripts instantly.
+                                </p>
+
+                                <!-- Simulation Steps Timeline -->
+                                <div class="simulation-timeline-card mb-4">
+                                    <div class="timeline-header">
+                                        <span class="fw-bold text-teal" style="font-size: 0.85rem; letter-spacing: 0.5px;">AUTOMATION CHRONOLOGY</span>
+                                        <span class="badge bg-secondary fs-8">Simulation Queue</span>
+                                    </div>
+                                    <div class="sim-timeline">
+                                        <div class="sim-step" id="step-generation">
+                                            <div class="fw-bold text-white">Generate Delivery Report</div>
+                                            <div class="fs-8 text-secondary">Triggered daily at 12:00 AM</div>
+                                        </div>
+                                        <div class="sim-step" id="step-bucket">
+                                            <div class="fw-bold text-white">Save Report to Bucket</div>
+                                            <div class="fs-8 text-secondary">File: gs://tms-delivery-bucket/reports/</div>
+                                        </div>
+                                        <div class="sim-step" id="step-extraction">
+                                            <div class="fw-bold text-white">Extract File & Resolve Emails</div>
+                                            <div class="fs-8 text-secondary">Triggered daily at 9:00 AM</div>
+                                        </div>
+                                        <div class="sim-step" id="step-email">
+                                            <div class="fw-bold text-white">Dispatch Automated Mail</div>
+                                            <div class="fs-8 text-secondary">Send to all configured recipient IDs</div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-trigger-sim" id="btnStartSim">
+                                        <i class="bi bi-play-circle-fill"></i> Trigger Simulation Flow
+                                    </button>
+                                </div>
+
+                                <!-- Logging Console -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="custom-form-label fw-semibold m-0">Scheduler Execution Logs</label>
+                                    <button class="btn-clear-logs" id="clearLogsBtn">
+                                        <i class="bi bi-trash3 me-1"></i>Clear Logs
+                                    </button>
+                                </div>
+                                <div class="terminal-logs-box flex-grow-1" id="terminalLogs">
+                                    <!-- Rendered dynamically by automate.js -->
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Success Toast Popups -->
+    <div class="sim-toast" id="simToast">
+        <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+        <div>
+            <strong class="d-block text-white">Simulation Completed!</strong>
+            <span class="text-secondary fs-8">Automated email report sent to all configured recipients.</span>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Application JS -->
+    <script src="../js/automate.js?v=2"></script>
+</body>
+</html>

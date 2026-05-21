@@ -1,0 +1,577 @@
+/* iSupayX ISU Admin Dashboard Styling - Automate Mail Page */
+:root {
+    --isu-orange: #ef6c35;
+    --isu-teal: #0b7570;
+    --isu-teal-dark: #085e5a;
+    --isu-teal-light: #81babb;
+    --isu-dark-blue: #324354;
+    --isu-dark-blue-hover: #263340;
+    --isu-bg: #f4f6fa;
+    --isu-border: #e2e8f0;
+    
+    /* Brand Colors */
+    --card-teal: #229a92;
+    --card-teal-hover: #1c827b;
+    --page-mint-bg: #e2f0ed;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--isu-bg);
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Header Styling */
+.isu-header {
+    background-color: var(--isu-orange);
+    height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.isu-logo-circle {
+    width: 36px;
+    height: 36px;
+    background-color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.isu-logo-text {
+    color: var(--isu-teal);
+    font-weight: 800;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.isu-brand-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-toggle-btn {
+    font-size: 1.5rem;
+    border: none;
+    background: transparent;
+    padding: 0;
+    line-height: 1;
+}
+
+.wallet-badge {
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.settings-btn {
+    font-size: 1.25rem;
+    background: transparent;
+    border: none;
+    transition: transform 0.2s ease;
+}
+
+.settings-btn:hover {
+    transform: rotate(45deg);
+}
+
+/* Main Container Wrapper */
+.isu-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.isu-sidebar {
+    width: 250px;
+    background-color: var(--isu-teal);
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    z-index: 1020;
+    transition: all 0.3s ease;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+    background-color: var(--isu-teal-dark);
+    padding: 12px 18px;
+}
+
+.sidebar-title {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 1px;
+}
+
+.sidebar-nav .nav-link {
+    color: white;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    cursor: default;
+}
+
+.sidebar-nav .nav-link.disabled-sidebar-item {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: var(--isu-teal-dark);
+    font-weight: 600;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.nav-icon {
+    font-size: 1.1rem;
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Main Content Styling */
+.isu-main-content {
+    flex: 1;
+    margin-left: 250px;
+    margin-top: 60px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    background-color: var(--page-mint-bg);
+    min-height: calc(100vh - 60px);
+}
+
+/* Custom Card Container matching layout */
+.custom-card-container {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 1200px;
+    border: none;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.custom-card-header {
+    background-color: var(--card-teal);
+    padding: 16px 24px;
+    height: 70px;
+}
+
+.custom-card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    letter-spacing: 0.3px;
+    width: 100%;
+}
+
+.back-circle-btn {
+    width: 34px;
+    height: 34px;
+    background-color: #0dddd3;
+    border-radius: 50%;
+    color: white !important;
+    transition: transform 0.2s, background-color 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.back-circle-btn:hover {
+    transform: scale(1.05);
+    background-color: #0bcbc2;
+}
+
+/* Content blocks */
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    height: 100%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 10px;
+}
+
+/* Form Styling */
+.custom-input-group {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.custom-input-group:focus-within {
+    border-color: var(--card-teal);
+    box-shadow: 0 0 0 3px rgba(34, 154, 146, 0.15);
+}
+
+.custom-input-group input {
+    border: none;
+    font-size: 0.92rem;
+    padding: 10px 14px;
+}
+
+.custom-input-group input:focus {
+    box-shadow: none;
+}
+
+.btn-add-email {
+    background-color: var(--card-teal);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-add-email:hover {
+    background-color: var(--card-teal-hover);
+    color: white;
+}
+
+/* Email Recipient List chips */
+.emails-list-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.email-item {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 6px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #334155;
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.email-item:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.email-item.removing {
+    transform: scale(0.8);
+    opacity: 0;
+    transition: all 0.25s ease;
+}
+
+.email-remove-btn {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    font-size: 1rem;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.email-remove-btn:hover {
+    color: #ef4444;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Pulse status dot */
+.status-dot-pulse {
+    width: 10px;
+    height: 10px;
+    background-color: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #10b981;
+    animation: pulse-dot 1.8s infinite;
+}
+
+@keyframes pulse-dot {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Rules / Schedules Cards */
+.schedule-rule-box {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.schedule-rule-box:hover {
+    border-color: var(--card-teal);
+    background-color: #f0faf9;
+}
+
+.rule-time {
+    font-size: 0.82rem;
+    background: rgba(34, 154, 146, 0.12);
+    color: var(--card-teal-hover);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.rule-meta {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Simulation Section styling */
+.simulation-timeline-card {
+    background-color: #0f172a;
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+    padding: 20px;
+    color: #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.timeline-header {
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sim-timeline {
+    position: relative;
+    padding-left: 26px;
+    margin-bottom: 16px;
+}
+
+.sim-timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: #334155;
+}
+
+.sim-step {
+    position: relative;
+    margin-bottom: 18px;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+    font-size: 0.85rem;
+}
+
+.sim-step.active {
+    opacity: 1;
+    font-weight: 500;
+}
+
+.sim-step.completed {
+    opacity: 1;
+}
+
+.sim-step::before {
+    content: '';
+    position: absolute;
+    left: -23px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #475569;
+    border: 2px solid #0f172a;
+    transition: all 0.3s;
+}
+
+.sim-step.active::before {
+    background: #38bdf8;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+}
+
+.sim-step.completed::before {
+    background: #34d399;
+    box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.2);
+}
+
+.btn-trigger-sim {
+    background-color: var(--card-teal);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-trigger-sim:hover {
+    background-color: var(--card-teal-hover);
+    box-shadow: 0 4px 12px rgba(34, 154, 146, 0.3);
+}
+
+.btn-trigger-sim:disabled {
+    background-color: #475569;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Logging Terminal Display */
+.terminal-logs-box {
+    background-color: #020617;
+    color: #e2e8f0;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78rem;
+    height: 180px;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+}
+
+.terminal-log-row {
+    margin-bottom: 4px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.log-time {
+    color: #64748b;
+}
+
+.log-tag-system {
+    color: #a855f7;
+    font-weight: bold;
+}
+
+.log-tag-gcs {
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+.log-tag-email {
+    color: #3b82f6;
+    font-weight: bold;
+}
+
+.log-tag-success {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+/* Clear logs btn */
+.btn-clear-logs {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 0.75rem;
+    transition: color 0.2s;
+    font-weight: 500;
+}
+
+.btn-clear-logs:hover {
+    color: #94a3b8;
+    text-decoration: underline;
+}
+
+/* Success Toast Notification */
+.sim-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1e293b;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    border-left: 4px solid #10b981;
+    transform: translateY(120%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sim-toast.show {
+    transform: translateY(0);
+}
+
+/* Responsive sidebars and container padding */
+@media (max-width: 992px) {
+    .isu-sidebar {
+        left: -250px;
+    }
+    
+    .isu-sidebar.show {
+        left: 0;
+    }
+    
+    .isu-main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+}
