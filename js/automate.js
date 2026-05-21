@@ -43,6 +43,89 @@ $(document).ready(function () {
         });
     }
 
+    // 1b. EMAILJS SERVICE CONFIGURATION
+    let emailJSConfig = {
+        enabled: false,
+        publicKey: '',
+        serviceId: '',
+        templateId: ''
+    };
+
+    function loadEmailJSConfig() {
+        const stored = localStorage.getItem('tms_emailjs_config');
+        if (stored) {
+            emailJSConfig = JSON.parse(stored);
+        }
+        
+        // Populate inputs
+        $('#enableRealEmails').prop('checked', emailJSConfig.enabled);
+        $('#emailJSPublicKey').val(emailJSConfig.publicKey);
+        $('#emailJSServiceID').val(emailJSConfig.serviceId);
+        $('#emailJSTemplateID').val(emailJSConfig.templateId);
+
+        // Show/hide fields
+        if (emailJSConfig.enabled) {
+            $('#emailJSConfigFields').show();
+        } else {
+            $('#emailJSConfigFields').hide();
+        }
+
+        // Init SDK if enabled & public key exists
+        if (emailJSConfig.enabled && emailJSConfig.publicKey) {
+            try {
+                emailjs.init(emailJSConfig.publicKey);
+            } catch (err) {
+                console.error("Failed to initialize EmailJS SDK:", err);
+            }
+        }
+    }
+
+    // Toggle switch handler
+    $('#enableRealEmails').on('change', function () {
+        const isChecked = $(this).is(':checked');
+        if (isChecked) {
+            $('#emailJSConfigFields').slideDown(200);
+        } else {
+            $('#emailJSConfigFields').slideUp(200);
+            emailJSConfig.enabled = false;
+            localStorage.setItem('tms_emailjs_config', JSON.stringify(emailJSConfig));
+            addLog('SYSTEM', 'Automatic background mailing disabled.');
+        }
+    });
+
+    // Save Configuration handler
+    $('#btnSaveConfig').on('click', function () {
+        const enabled = $('#enableRealEmails').is(':checked');
+        const publicKey = $('#emailJSPublicKey').val().trim();
+        const serviceId = $('#emailJSServiceID').val().trim();
+        const templateId = $('#emailJSTemplateID').val().trim();
+
+        if (enabled && (!publicKey || !serviceId || !templateId)) {
+            alert('Please fill out all EmailJS configuration fields.');
+            return;
+        }
+
+        emailJSConfig = { enabled, publicKey, serviceId, templateId };
+        localStorage.setItem('tms_emailjs_config', JSON.stringify(emailJSConfig));
+
+        // Re-initialize SDK
+        if (enabled && publicKey) {
+            try {
+                emailjs.init(publicKey);
+            } catch (err) {
+                console.error("Failed to initialize EmailJS:", err);
+            }
+        }
+
+        const successMsg = $('#configSuccessMsg');
+        successMsg.removeClass('d-none');
+        setTimeout(() => {
+            successMsg.addClass('d-none');
+        }, 3000);
+
+        addLog('SYSTEM', `Saved EmailJS configuration. Auto background mailing: ${enabled ? 'ENABLED' : 'DISABLED'}`);
+    });
+
     // Add Email ID handler
     $('#emailAddForm').on('submit', function (e) {
         e.preventDefault();
@@ -243,33 +326,76 @@ $(document).ready(function () {
 
         // Step 4 Details & Final Success
         id = setTimeout(() => {
-            addLog('EMAIL', `MIME email successfully generated and queued for SMTP transport.`);
-            addLog('SUCCESS', `Automated email dispatched successfully to: ${recipientListStr}`);
-            $('#step-email').removeClass('active').addClass('completed');
-            addLog('SYSTEM', `Daily scheduler process completed successfully.`);
-            
-            // Show Success Toast
-            const toast = $('#simToast');
-            toast.addClass('show');
-            setTimeout(() => {
-                toast.removeClass('show');
-            }, 4000);
+            if (emailJSConfig.enabled && emailJSConfig.publicKey && emailJSConfig.serviceId && emailJSConfig.templateId) {
+                addLog('EMAIL', `Attempting background email transmission via EmailJS...`);
+                
+                emailjs.send(emailJSConfig.serviceId, emailJSConfig.templateId, {
+                    to_email: recipientListStr,
+                    subject: `Daily Delivery Report: firstbank-${dateStr}`,
+                    bucket_path: bucketPath,
+                    date: dateStr
+                })
+                .then(function(response) {
+                    addLog('SUCCESS', `Email sent successfully in background! (Response Status: ${response.status})`);
+                    completeDispatch(true);
+                }, function(error) {
+                    addLog('SYSTEM', `ERROR: EmailJS background transmission failed: ${JSON.stringify(error)}`);
+                    addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
+                    completeDispatch(false);
+                });
+            } else {
+                addLog('EMAIL', `MIME email successfully generated and queued for SMTP transport.`);
+                addLog('SUCCESS', `Automated email dispatched successfully to: ${recipientListStr}`);
+                completeDispatch(false);
+            }
 
-            // Populate and Show Mock Email Modal
-            const firstEmail = emails.length > 0 ? emails[0] : 'your-email@domain.com';
-            $('#emailToDisplay').text(recipientListStr);
-            $('#emailSubjectDisplay').text(`Daily Delivery Report: firstbank-${dateStr}`);
-            $('#emailBucketPathDisplay').text(`gs://tms-delivery-bucket/reports/firstbank-${dateStr}.xlsx`);
-            $('#emailAttachmentNameDisplay').text(`firstbank-${dateStr}.csv`);
-            
-            // Trigger automatic demofile download for verification
-            downloadDemoFile(dateStr);
-            addLog('SYSTEM', `Auto-downloaded demo file [firstbank-${dateStr}.csv] locally to simulate mail attachment.`);
+            function completeDispatch(isSentInBackground) {
+                $('#step-email').removeClass('active').addClass('completed');
+                addLog('SYSTEM', `Daily scheduler process completed successfully.`);
+                
+                // Show Success Toast
+                const toast = $('#simToast');
+                toast.addClass('show');
+                setTimeout(() => {
+                    toast.removeClass('show');
+                }, 4000);
 
-            // Show modal
-            $('#mockEmailModalOverlay').css('display', 'flex');
+                // Populate and Show Mock Email Modal
+                $('#emailToDisplay').text(recipientListStr);
+                $('#emailSubjectDisplay').text(`Daily Delivery Report: firstbank-${dateStr}`);
+                $('#emailBucketPathDisplay').text(`gs://tms-delivery-bucket/reports/firstbank-${dateStr}.xlsx`);
+                $('#emailAttachmentNameDisplay').text(`firstbank-${dateStr}.csv`);
+                
+                // Trigger automatic demofile download for verification
+                downloadDemoFile(dateStr);
+                addLog('SYSTEM', `Auto-downloaded demo file [firstbank-${dateStr}.csv] locally to simulate mail attachment.`);
 
-            btn.prop('disabled', false);
+                // Show modal (with visual state based on whether real background send occurred)
+                if (isSentInBackground) {
+                    // Update header text to signify it actually sent
+                    $('#mockEmailModalOverlay').find('.fs-6').text('Background Email Dispatched (Success)');
+                    $('#mockEmailModalOverlay').find('.alert-info').removeClass('alert-info').addClass('alert-success').html(
+                        `<i class="bi bi-check-circle-fill text-success fs-5 mt-0.5"></i>
+                         <div>
+                             <strong>Automated Dispatch Successful:</strong> The email has been sent successfully in the background to the configured recipients via EmailJS. No additional manual steps are needed.
+                         </div>`
+                    );
+                    $('#btnSendRealMail').hide(); // Hide draft button since it's already sent
+                } else {
+                    $('#mockEmailModalOverlay').find('.fs-6').text('Incoming Email Simulation');
+                    // Reset modal styles/alert
+                    $('#mockEmailModalOverlay').find('.alert-success').removeClass('alert-success').addClass('alert-info').html(
+                        `<i class="bi bi-info-circle-fill text-primary fs-5 mt-0.5"></i>
+                         <div>
+                             <strong>Simulation Sandbox:</strong> Since this is a frontend portal, automated background emails cannot be sent. You can download the generated report below, or click <strong>Draft Real Email</strong> to open your local mail client with the recipients pre-filled.
+                         </div>`
+                    );
+                    $('#btnSendRealMail').show();
+                }
+
+                $('#mockEmailModalOverlay').css('display', 'flex');
+                btn.prop('disabled', false);
+            }
         }, 9500);
         simTimeoutIds.push(id);
     });
@@ -331,6 +457,7 @@ $(document).ready(function () {
     // Initialize Page
     loadEmails();
     renderEmails();
+    loadEmailJSConfig();
     loadLogs();
     renderLogs();
 });
