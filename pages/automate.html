@@ -322,7 +322,7 @@
                                 </h3>
                                 
                                 <p class="fs-7 text-muted mb-4">
-                                    Use the simulator to dry-run the 12:00 AM report compiler and 9:00 AM dispatch automation scripts instantly.
+                                    Use the simulator to dry-run the indent file compiler (12:00 PM - 11:59 PM window) and next-day 9:00 AM dispatch scripts.
                                 </p>
 
                                 <!-- Simulation Steps Timeline -->
@@ -333,20 +333,20 @@
                                     </div>
                                     <div class="sim-timeline">
                                         <div class="sim-step" id="step-generation">
-                                            <div class="fw-bold text-white">Generate Delivery Report</div>
-                                            <div class="fs-8 text-secondary">Triggered daily at 12:00 AM</div>
+                                            <div class="fw-bold text-white">Fetch & Compile Indent Files</div>
+                                            <div class="fs-8 text-secondary">Uploaded 12:00 PM - 11:59 PM</div>
                                         </div>
                                         <div class="sim-step" id="step-bucket">
-                                            <div class="fw-bold text-white">Save Report to Bucket</div>
-                                            <div class="fs-8 text-secondary">File: gs://tms-delivery-bucket/reports/</div>
+                                            <div class="fw-bold text-white">Save Indents to Bucket</div>
+                                            <div class="fs-8 text-secondary">Structure: gs://tms-indent-bucket/Bank/Year/Month/Date/</div>
                                         </div>
                                         <div class="sim-step" id="step-extraction">
                                             <div class="fw-bold text-white">Extract File & Resolve Emails</div>
-                                            <div class="fs-8 text-secondary">Triggered daily at 9:00 AM</div>
+                                            <div class="fs-8 text-secondary">Triggered next day at 9:00 AM</div>
                                         </div>
                                         <div class="sim-step" id="step-email">
                                             <div class="fw-bold text-white">Dispatch Automated Mail</div>
-                                            <div class="fs-8 text-secondary">Send to all configured recipient IDs</div>
+                                            <div class="fs-8 text-secondary">Send bucket file links bank-wise</div>
                                         </div>
                                     </div>
                                     <button class="btn btn-trigger-sim" id="btnStartSim">

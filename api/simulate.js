@@ -19,6 +19,15 @@ module.exports = async (req, res) => {
         const { emails = [], emailConfig = {}, origin = 'http://localhost:8080' } = req.body || {};
         const dateStr = new Date().toISOString().split('T')[0];
 
+        // Parse yesterday's date for GCS directories
+        const dateObj = new Date();
+        dateObj.setDate(dateObj.getDate() - 1);
+        const yearStr = dateObj.getFullYear();
+        const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthStr = MONTHS_LONG[dateObj.getMonth()];
+        const dayStr = dateObj.getDate() + '-' + MONTHS_SHORT[dateObj.getMonth()];
+
         // 1. Determine active banks
         let activeBanks = [];
         if (emails.length > 0) {
@@ -46,27 +55,27 @@ module.exports = async (req, res) => {
             logEntries.push({ time: timeStr, tag, msg });
         };
 
-        // --- Step 1: Report Compilation ---
-        addServerLog('SYSTEM', 'Initiating scheduled delivery report compilation (Simulated 12:00 AM Cron)...');
-        addServerLog('SYSTEM', `Gathered Courier Dispatch logs, Terminal AWB logs, and Delivery logs.`);
+        // --- Step 1: Fetch & Compile Indents ---
+        addServerLog('SYSTEM', 'Initiating scheduled daily indent check (12:00 PM - 11:59 PM window)...');
+        addServerLog('SYSTEM', `Fetched all daily indent files uploaded between 12:00 PM and 11:59 PM yesterday (${dayStr}).`);
         
         activeBanks.forEach(bank => {
-            const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
-            addServerLog('SUCCESS', `Successfully compiled daily delivery report sheet for [${bank}]. Filename: ${bankSlug}-${dateStr}.xlsx`);
+            const bankFolder = bank.split(' ')[0].toUpperCase();
+            addServerLog('SUCCESS', `Found indent files for bank [${bank}]. Filename: indent_records_${bankFolder.toLowerCase()}.xlsx`);
         });
 
         // --- Step 2: GCS Upload ---
         addServerLog('SYSTEM', `Initiating Google Cloud Storage bucket upload...`);
-        addServerLog('GCS', `Authenticating with GCS bucket tms-delivery-bucket.`);
+        addServerLog('GCS', `Authenticating with GCS bucket tms-indent-bucket.`);
         
         activeBanks.forEach(bank => {
-            const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
-            addServerLog('GCS', `Uploading report file: [reports/${bankSlug}-${dateStr}.xlsx]`);
+            const bankFolder = bank.split(' ')[0].toUpperCase();
+            addServerLog('GCS', `Uploading report file: [${bankFolder}/${yearStr}/${monthStr}/${dayStr}/indent_records_${bankFolder.toLowerCase()}.xlsx]`);
         });
         addServerLog('SUCCESS', `All compiled reports uploaded and archived successfully.`);
 
-        // --- Step 3: Resolve Emails ---
-        addServerLog('SYSTEM', `Initiating automated email dispatch queue (Simulated 9:00 AM Cron)...`);
+        // --- Step 3: Extract & Resolve ---
+        addServerLog('SYSTEM', `Triggering automated email dispatch queue next day at 9:00 AM...`);
         addServerLog('EMAIL', `Resolving configured email recipient IDs bank-wise...`);
 
         if (emails.length === 0) {
@@ -121,12 +130,12 @@ module.exports = async (req, res) => {
             if (bankRecipients.length === 0) return;
 
             const recipientListStr = bankRecipients.join(', ');
-            const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
-            const filename = `${bankSlug}-${dateStr}.xlsx`;
-            const bucketPath = `gs://tms-delivery-bucket/reports/${filename}`;
-            const downloadUrl = origin.split('?')[0] + '?download=' + bankSlug + '-' + dateStr;
+            const bankFolder = bank.split(' ')[0].toUpperCase();
+            const filename = `indent_records_${bankFolder.toLowerCase()}.xlsx`;
+            const bucketPath = `gs://tms-indent-bucket/${bankFolder}/${yearStr}/${monthStr}/${dayStr}/${filename}`;
+            const downloadUrl = origin.split('?')[0] + '?download=' + bankFolder.toLowerCase() + '-' + dateStr;
             const csvData = generateCSVText(bank);
-            const emailSubject = `Daily Delivery Report: ${bank} - ${dateStr}`;
+            const emailSubject = `Automated Indent Files Dispatch: ${bank} - ${dayStr} ${yearStr}`;
 
             dispatches.push({
                 bank: bank,
@@ -134,19 +143,19 @@ module.exports = async (req, res) => {
                 recipientListStr: recipientListStr,
                 subject: emailSubject,
                 filename: filename,
-                csvFilename: `${bankSlug}-${dateStr}.csv`,
+                csvFilename: `${bankFolder.toLowerCase()}_indent-${dateStr}.csv`,
                 bucketPath: bucketPath,
                 downloadUrl: downloadUrl,
                 csvData: csvData,
                 message: `Dear Operations Team,\n\n` +
-                    `The daily scheduled Terminal Delivery Status report for ${bank} has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
+                    `The daily scheduled Indent Report for ${bank} (uploaded yesterday between 12:00 PM and 11:59 PM) has been compiled and saved under the corresponding date folder in Google Cloud Storage.\n\n` +
                     `Bucket Location:\n${bucketPath}\n\n` +
                     `-----------------------------------------\n` +
-                    `REPORT DATA (CSV FORMAT):\n` +
+                    `INLINE CSV EXCERPT:\n` +
                     `-----------------------------------------\n` +
                     `${csvData}\n` +
                     `-----------------------------------------\n\n` +
-                    `Direct Download Link (Click to automatically download the CSV file):\n` +
+                    `Direct Download Link (Click to automatically download the indent file):\n` +
                     `${downloadUrl}\n\n` +
                     `Recipients: ${recipientListStr}\n\n` +
                     `Best Regards,\n` +

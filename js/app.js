@@ -198,11 +198,17 @@ $(document).ready(function () {
         if (reportType === 'Indent Path') {
             seconds = 8;
             
-            const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
-            const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const dateObj = new Date();
+            const yearStr = dateObj.getFullYear();
+            const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const monthStr = MONTHS_LONG[dateObj.getMonth()];
+            const dayStr = dateObj.getDate() + '-' + MONTHS_SHORT[dateObj.getMonth()];
+            const bankFolder = bank.split(' ')[0].toUpperCase();
+            
             const nameToUse = fileName || 'indent_path_records.xlsx';
-            const bucketUrl = `gs://tms-indent-bucket/uploads/${bankSlug}/indent_path/${timestamp}/${nameToUse}`;
-            const consoleBucketUrl = `https://console.cloud.google.com/storage/browser/tms-indent-bucket/uploads/${bankSlug}/indent_path/${timestamp}`;
+            const bucketUrl = `gs://tms-indent-bucket/${bankFolder}/${yearStr}/${monthStr}/${dayStr}/${nameToUse}`;
+            const consoleBucketUrl = `https://console.cloud.google.com/storage/browser/tms-indent-bucket/${bankFolder}/${yearStr}/${monthStr}/${dayStr}`;
             
             const bucketHtml = `
                 <div class="bucket-path-box mx-auto my-4 text-start" style="max-width: 500px;">

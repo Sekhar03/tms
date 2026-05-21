@@ -337,8 +337,8 @@ $(document).ready(function () {
     // 2. SIMULATION & LOGGING TERMINAL
     let logs = [];
     const defaultLogs = [
-        { time: '2026-05-20 00:00:01', tag: 'SUCCESS', msg: 'Daily delivery report saved at gs://tms-delivery-bucket/reports/firstbank-2026-05-20.xlsx' },
-        { time: '2026-05-20 09:00:05', tag: 'EMAIL', msg: 'Dispatched automated email with firstbank-2026-05-20.xlsx to ops-lead@iserveu.in, bank-audit@firstbank.com' }
+        { time: '2026-05-20 00:00:01', tag: 'SUCCESS', msg: 'Fetched indent files uploaded between 12:00 PM and 11:59 PM (20-May). Saved at gs://tms-indent-bucket/SBI/2026/May/20-May/indent_records_sbi.xlsx' },
+        { time: '2026-05-21 09:00:05', tag: 'EMAIL', msg: 'Dispatched automated email containing indent file link (gs://tms-indent-bucket/SBI/2026/May/20-May/indent_records_sbi.xlsx) to bank-audit@firstbank.com' }
     ];
 
     function loadLogs() {
@@ -522,19 +522,29 @@ $(document).ready(function () {
         simTimeoutIds.forEach(clearTimeout);
         simTimeoutIds = [];
 
-        // --- Step 1: Report Generation (12:00 AM Simulation) ---
-        addLog('SYSTEM', 'Initiating scheduled delivery report compilation (Simulated 12:00 AM Cron)...');
+        // Parse dateStr (Day X+1, run time) to resolve yesterday's date (Day X, upload time)
+        const parts = dateStr.split('-');
+        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+        dateObj.setDate(dateObj.getDate() - 1);
+        const yearStr = dateObj.getFullYear();
+        const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthStr = MONTHS_LONG[dateObj.getMonth()];
+        const dayStr = dateObj.getDate() + '-' + MONTHS_SHORT[dateObj.getMonth()];
+
+        // --- Step 1: Fetch & Compile Indents ---
+        addLog('SYSTEM', 'Initiating scheduled daily indent check (12:00 PM - 11:59 PM window)...');
         $('#step-generation').addClass('active');
 
         let id = setTimeout(() => {
-            addLog('SYSTEM', `Gathered Courier Dispatch logs, Terminal AWB logs, and Delivery logs.`);
+            addLog('SYSTEM', `Fetched all daily indent files uploaded between 12:00 PM and 11:59 PM yesterday (${dayStr}).`);
             activeBanks.forEach(bank => {
-                const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
-                addLog('SUCCESS', `Successfully compiled daily delivery report sheet for [${bank}]. Filename: ${bankSlug}-${dateStr}.xlsx`);
+                const bankFolder = bank.split(' ')[0].toUpperCase();
+                addLog('SUCCESS', `Found indent files for bank [${bank}]. Filename: indent_records_${bankFolder.toLowerCase()}.xlsx`);
             });
             $('#step-generation').removeClass('active').addClass('completed');
             
-            // --- Step 2: Save to Bucket (GCS Upload Simulation) ---
+            // --- Step 2: Save Indents to Bucket ---
             addLog('SYSTEM', `Initiating Google Cloud Storage bucket upload...`);
             $('#step-bucket').addClass('active');
         }, 2000);
@@ -542,16 +552,16 @@ $(document).ready(function () {
 
         // Step 2 Details
         id = setTimeout(() => {
-            addLog('GCS', `Authenticating with GCS bucket tms-delivery-bucket.`);
+            addLog('GCS', `Authenticating with GCS bucket tms-indent-bucket.`);
             activeBanks.forEach(bank => {
-                const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
-                addLog('GCS', `Uploading report file: [reports/${bankSlug}-${dateStr}.xlsx]`);
+                const bankFolder = bank.split(' ')[0].toUpperCase();
+                addLog('GCS', `Uploading report file: [${bankFolder}/${yearStr}/${monthStr}/${dayStr}/indent_records_${bankFolder.toLowerCase()}.xlsx]`);
             });
             addLog('SUCCESS', `All compiled reports uploaded and archived successfully.`);
             $('#step-bucket').removeClass('active').addClass('completed');
 
-            // --- Step 3: Extract from Bucket (Simulated 9:00 AM Cron) ---
-            addLog('SYSTEM', `Initiating automated email dispatch queue (Simulated 9:00 AM Cron)...`);
+            // --- Step 3: Extract & Resolve ---
+            addLog('SYSTEM', `Triggering automated email dispatch queue next day at 9:00 AM...`);
             $('#step-extraction').addClass('active');
         }, 4500);
         simTimeoutIds.push(id);
@@ -607,12 +617,12 @@ $(document).ready(function () {
 
                 const recipientEmails = [...new Set(bankRecipients.map(item => item.email))];
                 const recipientListStr = recipientEmails.join(', ');
-                const bankSlug = bank.toLowerCase().replace(/\s+/g, '_');
-                const filename = `${bankSlug}-${dateStr}.xlsx`;
-                const bucketPath = `gs://tms-delivery-bucket/reports/${filename}`;
-                const downloadUrl = window.location.href.split('?')[0] + '?download=' + bankSlug + '-' + dateStr;
+                const bankFolder = bank.split(' ')[0].toUpperCase();
+                const filename = `indent_records_${bankFolder.toLowerCase()}.xlsx`;
+                const bucketPath = `gs://tms-indent-bucket/${bankFolder}/${yearStr}/${monthStr}/${dayStr}/${filename}`;
+                const downloadUrl = window.location.href.split('?')[0] + '?download=' + bankFolder.toLowerCase() + '-' + dateStr;
                 const csvData = generateCSVText(bank);
-                const emailSubject = `Daily Delivery Report: ${bank} - ${dateStr}`;
+                const emailSubject = `Automated Indent Files Dispatch: ${bank} - ${dayStr} ${yearStr}`;
                 
                 dispatches.push({
                     bank: bank,
@@ -620,19 +630,19 @@ $(document).ready(function () {
                     recipientListStr: recipientListStr,
                     subject: emailSubject,
                     filename: filename,
-                    csvFilename: `${bankSlug}-${dateStr}.csv`,
+                    csvFilename: `${bankFolder.toLowerCase()}_indent-${dateStr}.csv`,
                     bucketPath: bucketPath,
                     downloadUrl: downloadUrl,
                     csvData: csvData,
                     message: `Dear Operations Team,\n\n` +
-                        `The daily scheduled Terminal Delivery Status report for ${bank} has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
+                        `The daily scheduled Indent Report for ${bank} (uploaded yesterday between 12:00 PM and 11:59 PM) has been compiled and saved under the corresponding date folder in Google Cloud Storage.\n\n` +
                         `Bucket Location:\n${bucketPath}\n\n` +
                         `-----------------------------------------\n` +
-                        `REPORT DATA (CSV FORMAT):\n` +
+                        `INLINE CSV EXCERPT:\n` +
                         `-----------------------------------------\n` +
                         `${csvData}\n` +
                         `-----------------------------------------\n\n` +
-                        `Direct Download Link (Click to automatically download the CSV file):\n` +
+                        `Direct Download Link (Click to automatically download the indent file):\n` +
                         `${downloadUrl}\n\n` +
                         `Recipients: ${recipientListStr}\n\n` +
                         `Best Regards,\n` +

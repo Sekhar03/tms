@@ -169,16 +169,18 @@ Upon passing all validations, a modal overlay (`#successModalOverlay`) is render
 *Only applicable when the report type is **Indent Path**.*
 The success modal generates and presents a dedicated cloud storage bucket panel containing:
 1. **Bucket Path (Read-only Code Block):**
-   - Format: `gs://tms-indent-bucket/uploads/<bank_slug>/indent_path/<timestamp>/<filename>`
-   - `<bank_slug>`: The selected bank code converted to lowercase with spaces replaced by underscores (e.g., `HDFC Bank` -> `hdfc_bank`).
-   - `<timestamp>`: Date format `YYYYMMDD` formatted based on the execution date.
+   - Format: `gs://tms-indent-bucket/<Bank>/<Year>/<Month>/<Date>/<filename>`
+   - `<Bank>`: The uppercase bank code (e.g., `HDFC`, `SBI`, `KOTAK`).
+   - `<Year>`: 4-digit year format (e.g., `2026`).
+   - `<Month>`: Full month name capitalized (e.g., `January`, `May`).
+   - `<Date>`: Day number followed by the abbreviated month name (e.g., `17-Jan`, `21-May`).
    - `<filename>`: The name of the uploaded file if present, otherwise defaults to `indent_path_records.xlsx`.
 2. **Copy Button:**
    - Tapping the clipboard icon copies the bucket string to the device clipboard.
    - On success, the icon toggles to a checkmark for 2 seconds before reverting back.
 3. **Go to Bucket Button:**
    - An external anchor link that opens the Cloud Console storage browser in a new tab:
-   - Format: `https://console.cloud.google.com/storage/browser/tms-indent-bucket/uploads/<bank_slug>/indent_path/<timestamp>`
+   - Format: `https://console.cloud.google.com/storage/browser/tms-indent-bucket/<Bank>/<Year>/<Month>/<Date>`
 
 ### Dynamic Sample Template Download (Reports Screen)
 Clicking the **Download Sample Excel Sheet** button fetches a dynamically built CSV template based on the current selection:
@@ -213,10 +215,10 @@ Clicking the **Download Sample Excel Sheet** button fetches a dynamically built 
 ### Scheduler Simulator Control Panel (Automate Screen)
 * The right-hand column features a **Scheduler Simulator** containing:
   1. **Timeline:** Visual stages that highlight in sequence:
-     - *Generate Delivery Report* (Compiles daily records bank-wise).
-     - *Save Report to Bucket* (Archives compiled reports to cloud storage bucket `tms-delivery-bucket` with bank-specific filenames).
-     - *Extract File & Resolve Emails* (Extracts reports and maps recipients: direct bank mappings + "All Banks").
-     - *Dispatch Automated Mail* (Sends emails to resolved recipients).
+     - *Fetch & Compile Indent Files* (Fetches all daily indent files uploaded between 12:00 PM and 11:59 PM bank-wise).
+     - *Save Indents to Bucket* (Saves reports to cloud storage bucket `tms-indent-bucket` under chronological folders `Bank > Year > Month > Date`).
+     - *Extract File & Resolve Emails* (Triggered next day at 9:00 AM, resolving configured recipients bank-wise).
+     - *Dispatch Automated Mail* (Dispatches automated emails containing the direct cloud bucket file links to resolved bank recipients).
   2. **Trigger Button:** Initiates the simulation flow, sending a POST request containing configured recipients and keys to the Vercel serverless `/api/simulate` endpoint.
   3. **Terminal Console:** Renders raw execution rows containing timestamped logs. It progressively pulls and prints logs from the server response (or falls back to client execution logs) over a premium 9.5-second ticking sequence to preserve the simulated scheduler timeline.
   4. **Email Inbox Modal:** Opens upon completion of the dispatch stage to simulate the received email. Contains dynamic tabbed navigation buttons (`#emailModalTabs`) if multiple bank dispatches are generated. Clicking tabs dynamically updates preview headers and bodies.
@@ -224,9 +226,9 @@ Clicking the **Download Sample Excel Sheet** button fetches a dynamically built 
 ### Automated Dispatch & Auto-Download Workaround Flow (Automate Screen)
 If background integration is enabled:
 1. The Vercel serverless function (`api/simulate.js`) or client-side fallback compiles separate reports in CSV format per active bank.
-2. It generates direct download URLs containing bank slugs and date parameters (e.g. `?download=hdfc_bank-YYYY-MM-DD`).
+2. It generates direct download URLs containing bank folders and date parameters (e.g. `?download=hdfc-YYYY-MM-DD`).
 3. It builds the email message body containing:
-   - Google Cloud Storage archive paths.
+   - Google Cloud Storage archive paths following the structure `gs://tms-indent-bucket/<Bank>/<Year>/<Month>/<Date>/<filename>`.
    - Inline report data printed as a formatted text block.
    - A direct download hyperlink containing the parameter.
 4. The message payload is sent directly from the serverless backend (bypassing browser CORS restrictions and protecting access keys) to the selected background dispatch endpoint.
@@ -234,7 +236,7 @@ If background integration is enabled:
 6. When the recipient clicks the **Direct Download Link** in their email:
    - The browser opens the dashboard.
    - On load, the page parses the query string for `download`.
-   - The dashboard automatically resolves the bank slug and triggers a local download of the CSV report file (`hdfc_bank-YYYY-MM-DD.csv`).
+   - The dashboard automatically resolves the bank slug and triggers a local download of the CSV report file (`hdfc_indent-YYYY-MM-DD.csv`).
 
 ### Manual Email Client Drafting Flow (Automate Screen)
 If background integration is disabled:
@@ -267,7 +269,7 @@ If background integration is disabled:
 ### 3. Success Modal & Cloud Buckets
 * [ ] Form submission triggers a full-page backdrop blur modal showing an emerald circle checkmark.
 * [ ] The Cloud Bucket Path is displayed in a styled container only when Indent Path is submitted.
-* [ ] The Cloud Bucket URL matches the structure: `gs://tms-indent-bucket/uploads/<bank_slug>/indent_path/<timestamp>/<filename>`.
+* [ ] The Cloud Bucket URL matches the structure: `gs://tms-indent-bucket/<Bank>/<Year>/<Month>/<Date>/<filename>`.
 * [ ] Copy Button copies the bucket URL string to the clipboard and displays a clipboard-check visual cue for 2 seconds.
 * [ ] Go to Bucket button opens the correct Cloud Console browser URL in a new tab.
 
