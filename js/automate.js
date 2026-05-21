@@ -255,9 +255,53 @@ $(document).ready(function () {
                 toast.removeClass('show');
             }, 4000);
 
+            // Populate and Show Mock Email Modal
+            const firstEmail = emails.length > 0 ? emails[0] : 'your-email@domain.com';
+            $('#emailToDisplay').text(recipientListStr);
+            $('#emailSubjectDisplay').text(`Daily Delivery Report: firstbank-${dateStr}`);
+            $('#emailBucketPathDisplay').text(`gs://tms-delivery-bucket/reports/firstbank-${dateStr}.xlsx`);
+            $('#emailAttachmentNameDisplay').text(`firstbank-${dateStr}.csv`);
+            
+            // Trigger automatic demofile download for verification
+            downloadDemoFile(dateStr);
+            addLog('SYSTEM', `Auto-downloaded demo file [firstbank-${dateStr}.csv] locally to simulate mail attachment.`);
+
+            // Show modal
+            $('#mockEmailModalOverlay').css('display', 'flex');
+
             btn.prop('disabled', false);
         }, 9500);
         simTimeoutIds.push(id);
+    });
+
+    // Helper: Generate and download demo CSV file
+    function downloadDemoFile(dateStr) {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Delivery ID,Order ID,Bank,Courier Partner,AWB Number,Delivery Status,Estimated Delivery\n";
+        csvContent += `DEL90021,ORD77309,FirstBank,BlueDart,AWB998822,Delivered,2026-05-19\n`;
+        csvContent += `DEL90022,ORD77310,FirstBank,Delhivery,AWB998823,In Transit,2026-05-21\n`;
+        csvContent += `DEL90023,ORD77311,FirstBank,Delhivery,AWB998824,Delivered,2026-05-20\n`;
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `firstbank-${dateStr}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Modal click bindings
+    $('#btnCloseEmailModal, #btnDismissEmailModal').on('click', function () {
+        $('#mockEmailModalOverlay').hide();
+    });
+
+    $('#btnDownloadEmailAttachment').on('click', function () {
+        const now = new Date();
+        const dateStr = now.getFullYear() + '-' + 
+            String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(now.getDate()).padStart(2, '0');
+        downloadDemoFile(dateStr);
     });
 
     // Initialize Page
