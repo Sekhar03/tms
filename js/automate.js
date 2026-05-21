@@ -43,37 +43,67 @@ $(document).ready(function () {
         });
     }
 
-    // 1b. EMAILJS SERVICE CONFIGURATION
-    let emailJSConfig = {
+    // 1b. EMAIL INTEGRATION SERVICE CONFIGURATION
+    let emailConfig = {
         enabled: false,
-        publicKey: '',
-        serviceId: '',
-        templateId: ''
+        provider: 'web3forms',
+        web3FormsKey: '',
+        emailJSPublicKey: '',
+        emailJSServiceID: '',
+        emailJSTemplateID: ''
     };
 
-    function loadEmailJSConfig() {
-        const stored = localStorage.getItem('tms_emailjs_config');
+    function loadEmailConfig() {
+        const stored = localStorage.getItem('tms_email_integration_config');
+        const legacyStored = localStorage.getItem('tms_emailjs_config');
+        
         if (stored) {
-            emailJSConfig = JSON.parse(stored);
+            emailConfig = JSON.parse(stored);
+        } else if (legacyStored) {
+            const legacy = JSON.parse(legacyStored);
+            emailConfig.enabled = legacy.enabled || false;
+            emailConfig.provider = 'emailjs';
+            emailConfig.emailJSPublicKey = legacy.publicKey || '';
+            emailConfig.emailJSServiceID = legacy.serviceId || '';
+            emailConfig.emailJSTemplateID = legacy.templateId || '';
         }
         
         // Populate inputs
-        $('#enableRealEmails').prop('checked', emailJSConfig.enabled);
-        $('#emailJSPublicKey').val(emailJSConfig.publicKey);
-        $('#emailJSServiceID').val(emailJSConfig.serviceId);
-        $('#emailJSTemplateID').val(emailJSConfig.templateId);
+        $('#enableRealEmails').prop('checked', emailConfig.enabled);
+        $('#emailProvider').val(emailConfig.provider || 'web3forms');
+        $('#web3FormsAccessKey').val(emailConfig.web3FormsKey || '');
+        $('#emailJSPublicKey').val(emailConfig.emailJSPublicKey || '');
+        $('#emailJSServiceID').val(emailConfig.emailJSServiceID || '');
+        $('#emailJSTemplateID').val(emailConfig.emailJSTemplateID || '');
 
         // Show/hide fields
-        if (emailJSConfig.enabled) {
-            $('#emailJSConfigFields').show();
-        } else {
-            $('#emailJSConfigFields').hide();
-        }
+        toggleFieldsVisibility();
 
-        // Init SDK if enabled & public key exists
-        if (emailJSConfig.enabled && emailJSConfig.publicKey) {
+        // Init EmailJS if needed
+        initEmailJS();
+    }
+
+    function toggleFieldsVisibility() {
+        const enabled = $('#enableRealEmails').is(':checked');
+        if (enabled) {
+            $('#emailProviderFields').show();
+            const provider = $('#emailProvider').val();
+            if (provider === 'web3forms') {
+                $('#web3FormsFields').show();
+                $('#emailJSFields').hide();
+            } else {
+                $('#web3FormsFields').hide();
+                $('#emailJSFields').show();
+            }
+        } else {
+            $('#emailProviderFields').hide();
+        }
+    }
+
+    function initEmailJS() {
+        if (emailConfig.enabled && emailConfig.provider === 'emailjs' && emailConfig.emailJSPublicKey) {
             try {
-                emailjs.init(emailJSConfig.publicKey);
+                emailjs.init(emailConfig.emailJSPublicKey);
             } catch (err) {
                 console.error("Failed to initialize EmailJS SDK:", err);
             }
@@ -84,37 +114,55 @@ $(document).ready(function () {
     $('#enableRealEmails').on('change', function () {
         const isChecked = $(this).is(':checked');
         if (isChecked) {
-            $('#emailJSConfigFields').slideDown(200);
+            $('#emailProviderFields').slideDown(200, function() {
+                toggleFieldsVisibility();
+            });
         } else {
-            $('#emailJSConfigFields').slideUp(200);
-            emailJSConfig.enabled = false;
-            localStorage.setItem('tms_emailjs_config', JSON.stringify(emailJSConfig));
+            $('#emailProviderFields').slideUp(200);
+            emailConfig.enabled = false;
+            localStorage.setItem('tms_email_integration_config', JSON.stringify(emailConfig));
             addLog('SYSTEM', 'Automatic background mailing disabled.');
         }
+    });
+
+    // Provider select change handler
+    $('#emailProvider').on('change', function () {
+        toggleFieldsVisibility();
     });
 
     // Save Configuration handler
     $('#btnSaveConfig').on('click', function () {
         const enabled = $('#enableRealEmails').is(':checked');
-        const publicKey = $('#emailJSPublicKey').val().trim();
-        const serviceId = $('#emailJSServiceID').val().trim();
-        const templateId = $('#emailJSTemplateID').val().trim();
+        const provider = $('#emailProvider').val();
+        const web3FormsKey = $('#web3FormsAccessKey').val().trim();
+        const emailJSPublicKey = $('#emailJSPublicKey').val().trim();
+        const emailJSServiceID = $('#emailJSServiceID').val().trim();
+        const emailJSTemplateID = $('#emailJSTemplateID').val().trim();
 
-        if (enabled && (!publicKey || !serviceId || !templateId)) {
-            alert('Please fill out all EmailJS configuration fields.');
-            return;
+        if (enabled) {
+            if (provider === 'web3forms' && !web3FormsKey) {
+                alert('Please enter your Web3Forms Access Key.');
+                return;
+            }
+            if (provider === 'emailjs' && (!emailJSPublicKey || !emailJSServiceID || !emailJSTemplateID)) {
+                alert('Please fill out all EmailJS configuration fields.');
+                return;
+            }
         }
 
-        emailJSConfig = { enabled, publicKey, serviceId, templateId };
-        localStorage.setItem('tms_emailjs_config', JSON.stringify(emailJSConfig));
+        emailConfig = {
+            enabled,
+            provider,
+            web3FormsKey,
+            emailJSPublicKey,
+            emailJSServiceID,
+            emailJSTemplateID
+        };
+        localStorage.setItem('tms_email_integration_config', JSON.stringify(emailConfig));
 
-        // Re-initialize SDK
-        if (enabled && publicKey) {
-            try {
-                emailjs.init(publicKey);
-            } catch (err) {
-                console.error("Failed to initialize EmailJS:", err);
-            }
+        // Re-initialize SDK if using emailjs
+        if (enabled && provider === 'emailjs') {
+            initEmailJS();
         }
 
         const successMsg = $('#configSuccessMsg');
@@ -123,7 +171,7 @@ $(document).ready(function () {
             successMsg.addClass('d-none');
         }, 3000);
 
-        addLog('SYSTEM', `Saved EmailJS configuration. Auto background mailing: ${enabled ? 'ENABLED' : 'DISABLED'}`);
+        addLog('SYSTEM', `Saved config. Provider: ${provider.toUpperCase()}, Auto Background Mailing: ${enabled ? 'ENABLED' : 'DISABLED'}`);
     });
 
     // Add Email ID handler
@@ -326,30 +374,77 @@ $(document).ready(function () {
 
         // Step 4 Details & Final Success
         id = setTimeout(() => {
-            if (emailJSConfig.enabled && emailJSConfig.publicKey && emailJSConfig.serviceId && emailJSConfig.templateId) {
-                addLog('EMAIL', `Attempting background email transmission via EmailJS...`);
-                
-                emailjs.send(emailJSConfig.serviceId, emailJSConfig.templateId, {
-                    to_email: recipientListStr,
-                    subject: `Daily Delivery Report: firstbank-${dateStr}`,
-                    bucket_path: bucketPath,
-                    date: dateStr
-                })
-                .then(function(response) {
-                    addLog('SUCCESS', `Email sent successfully in background! (Response Status: ${response.status})`);
-                    completeDispatch(true);
-                }, function(error) {
-                    addLog('SYSTEM', `ERROR: EmailJS background transmission failed: ${JSON.stringify(error)}`);
-                    addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
+            if (emailConfig.enabled) {
+                if (emailConfig.provider === 'web3forms' && emailConfig.web3FormsKey) {
+                    addLog('EMAIL', `Attempting background email transmission via Web3Forms...`);
+                    
+                    const emailSubject = `Daily Delivery Report: firstbank-${dateStr}`;
+                    const emailMessage = `Dear Operations Team,\n\n` +
+                        `The daily scheduled Terminal Delivery Status report has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
+                        `Bucket Location:\n${bucketPath}\n\n` +
+                        `Recipients: ${recipientListStr}\n\n` +
+                        `Best Regards,\n` +
+                        `iSupayX Terminal Automator`;
+
+                    fetch('https://api.web3forms.com/submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            access_key: emailConfig.web3FormsKey,
+                            subject: emailSubject,
+                            from_name: 'iSupayX Terminal Automator',
+                            message: emailMessage
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            addLog('SUCCESS', `Email sent successfully in background via Web3Forms!`);
+                            completeDispatch(true, 'Web3Forms');
+                        } else {
+                            addLog('SYSTEM', `ERROR: Web3Forms background transmission failed: ${data.message || 'Unknown error'}`);
+                            addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
+                            completeDispatch(false);
+                        }
+                    })
+                    .catch(error => {
+                        addLog('SYSTEM', `ERROR: Web3Forms API fetch request failed: ${error.message || error}`);
+                        addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
+                        completeDispatch(false);
+                    });
+
+                } else if (emailConfig.provider === 'emailjs' && emailConfig.emailJSPublicKey && emailConfig.emailJSServiceID && emailConfig.emailJSTemplateID) {
+                    addLog('EMAIL', `Attempting background email transmission via EmailJS...`);
+                    
+                    emailjs.send(emailConfig.emailJSServiceID, emailConfig.emailJSTemplateID, {
+                        to_email: recipientListStr,
+                        subject: `Daily Delivery Report: firstbank-${dateStr}`,
+                        bucket_path: bucketPath,
+                        date: dateStr
+                    })
+                    .then(function(response) {
+                        addLog('SUCCESS', `Email sent successfully in background via EmailJS! (Response Status: ${response.status})`);
+                        completeDispatch(true, 'EmailJS');
+                    }, function(error) {
+                        addLog('SYSTEM', `ERROR: EmailJS background transmission failed: ${JSON.stringify(error)}`);
+                        addLog('SYSTEM', `Falling back to manual modal draft simulation.`);
+                        completeDispatch(false);
+                    });
+                } else {
+                    addLog('EMAIL', `MIME email successfully generated and queued for SMTP transport.`);
+                    addLog('SUCCESS', `Automated email dispatched successfully to: ${recipientListStr}`);
                     completeDispatch(false);
-                });
+                }
             } else {
                 addLog('EMAIL', `MIME email successfully generated and queued for SMTP transport.`);
                 addLog('SUCCESS', `Automated email dispatched successfully to: ${recipientListStr}`);
                 completeDispatch(false);
             }
 
-            function completeDispatch(isSentInBackground) {
+            function completeDispatch(isSentInBackground, providerName) {
                 $('#step-email').removeClass('active').addClass('completed');
                 addLog('SYSTEM', `Daily scheduler process completed successfully.`);
                 
@@ -377,7 +472,7 @@ $(document).ready(function () {
                     $('#mockEmailModalOverlay').find('.alert-info').removeClass('alert-info').addClass('alert-success').html(
                         `<i class="bi bi-check-circle-fill text-success fs-5 mt-0.5"></i>
                          <div>
-                             <strong>Automated Dispatch Successful:</strong> The email has been sent successfully in the background to the configured recipients via EmailJS. No additional manual steps are needed.
+                             <strong>Automated Dispatch Successful:</strong> The email has been sent successfully in the background to the configured recipients via ${providerName}. No additional manual steps are needed.
                          </div>`
                     );
                     $('#btnSendRealMail').hide(); // Hide draft button since it's already sent
@@ -457,7 +552,7 @@ $(document).ready(function () {
     // Initialize Page
     loadEmails();
     renderEmails();
-    loadEmailJSConfig();
+    loadEmailConfig();
     loadLogs();
     renderLogs();
 });
