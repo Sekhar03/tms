@@ -5,7 +5,7 @@
 
 | Version | Completed Date | Function Name | Review Frequency | Author Name | Process Owner | Approved By | Approval Date |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **v2.0** | 2026-05-21 | TMS Module - Report Upload, Generation & Dispatch Suite | 6 Months | Antigravity AI | Common Admin | Basudev Behera | 2026-05-21 |
+| **v3.0** | 2026-05-21 | TMS Module - Report Upload, Generation & Dispatch Suite | 6 Months | Antigravity AI | Common Admin | Basudev Behera | 2026-05-21 |
 
 ---
 
@@ -192,56 +192,62 @@ Clicking the **Download Sample Excel Sheet** button fetches a dynamically built 
   - Filename: `indent_path_sample.xlsx`
   - Headers: `Indent ID,Bank,Device Type,Path Code,Terminal ID,Dispatch Date`
 
----
-
-### Email Recipient Management (Automate Screen)
-* The **Email Recipients** card displays a form with a text input (`#emailInput`) and an "Add Recipient" button.
+#### Email Recipient Management (Automate Screen)
+* The **Email Recipients** card displays a form with a text input (`#emailInput`), a bank selector dropdown (`#emailBankSelect`), and an "Add Recipient" button.
 * On submission:
   - The input is validated against standard email regex format.
-  - Duplicate email checks are performed.
-  - Valid emails are appended to local storage and rendered as interactive chips with removal buttons (`.email-remove-btn`).
-  - Actions (add/remove) append timestamps to the terminal logs.
+  - Duplicate email checks are performed per email and bank code pair.
+  - Valid recipients are appended to the directory list, automatically synchronizing with the Vercel serverless backend if available.
+  - Recipients are rendered as interactive chips with color-coded badges matching the bank's brand (e.g. green for "All Banks", blue for "HDFC Bank", red for "SBI", purple for "Kotak Bank"), containing a delete button (`.email-remove-btn`).
+  - Actions (add/remove) synchronize dynamically with the backend API `/api/emails` (using POST/DELETE requests) and write logs to the console terminal.
 
 ### Background Dispatch Service Integration (Automate Screen)
 * The **Email Service Integration** card contains an ON/OFF toggle switch (`#enableRealEmails`).
 * If toggled ON:
-  - Users select the integration method from a dropdown: *Simple Token-Based* or *Advanced Template-Based*.
-  - *Simple Token-Based* reveals a single credential input field (Key/Token).
-  - *Advanced Template-Based* reveals Public Key, Service ID, and Template ID fields.
+  - Users select the integration method from a dropdown: *Web3Forms* or *EmailJS*.
+  - *Web3Forms* reveals a single credential input field (Access Key).
+  - *EmailJS* reveals Public Key, Service ID, and Template ID fields.
   - Clicking "Save Configuration" commits the settings to persistent local storage.
+  - Automatic mailing credentials and settings are synchronized and secured by routing through the serverless backend function during simulation runs.
 
 ### Scheduler Simulator Control Panel (Automate Screen)
 * The right-hand column features a **Scheduler Simulator** containing:
   1. **Timeline:** Visual stages that highlight in sequence:
-     - *Generate Delivery Report* (Compiles local dispatch and audit records).
-     - *Save Report to Bucket* (Archives report to cloud storage).
-     - *Extract File & Resolve Emails* (Checks active notifications).
-     - *Dispatch Automated Mail* (Triggers background email transfer).
-  2. **Trigger Button:** Initiates the simulation flow, turning steps to "Active" and "Completed" over timed delays.
-  3. **Terminal Console:** Renders raw execution rows containing timestamped logs tagged with `[SYSTEM]`, `[STORAGE]`, `[EMAIL]`, or `[SUCCESS]`.
-  4. **Email Inbox Modal:** Opens upon completion of the dispatch stage to simulate the received email.
+     - *Generate Delivery Report* (Compiles daily records bank-wise).
+     - *Save Report to Bucket* (Archives compiled reports to cloud storage bucket `tms-delivery-bucket` with bank-specific filenames).
+     - *Extract File & Resolve Emails* (Extracts reports and maps recipients: direct bank mappings + "All Banks").
+     - *Dispatch Automated Mail* (Sends emails to resolved recipients).
+  2. **Trigger Button:** Initiates the simulation flow, sending a POST request containing configured recipients and keys to the Vercel serverless `/api/simulate` endpoint.
+  3. **Terminal Console:** Renders raw execution rows containing timestamped logs. It progressively pulls and prints logs from the server response (or falls back to client execution logs) over a premium 9.5-second ticking sequence to preserve the simulated scheduler timeline.
+  4. **Email Inbox Modal:** Opens upon completion of the dispatch stage to simulate the received email. Contains dynamic tabbed navigation buttons (`#emailModalTabs`) if multiple bank dispatches are generated. Clicking tabs dynamically updates preview headers and bodies.
 
 ### Automated Dispatch & Auto-Download Workaround Flow (Automate Screen)
 If background integration is enabled:
-1. The simulator compiles the report into CSV format.
-2. It fetches the host URL path and appends a query parameter: `?download=firstbank-YYYY-MM-DD`.
+1. The Vercel serverless function (`api/simulate.js`) or client-side fallback compiles separate reports in CSV format per active bank.
+2. It generates direct download URLs containing bank slugs and date parameters (e.g. `?download=hdfc_bank-YYYY-MM-DD`).
 3. It builds the email message body containing:
-   - Archive cloud storage bucket URL.
+   - Google Cloud Storage archive paths.
    - Inline report data printed as a formatted text block.
-   - A direct download hyperlink containing the query parameter.
-4. The message payload is sent to the selected background dispatch endpoint.
-5. On success, the simulator triggers a browser download of the report and opens the incoming email simulation modal.
-6. When the recipient receives the email and clicks the **Direct Download Link**:
+   - A direct download hyperlink containing the parameter.
+4. The message payload is sent directly from the serverless backend (bypassing browser CORS restrictions and protecting access keys) to the selected background dispatch endpoint.
+5. On success, the simulator triggers a browser download of the primary report and opens the incoming email simulation modal.
+6. When the recipient clicks the **Direct Download Link** in their email:
    - The browser opens the dashboard.
    - On load, the page parses the query string for `download`.
-   - The dashboard automatically triggers a local download of the CSV report file (`firstbank-YYYY-MM-DD.csv`).
+   - The dashboard automatically resolves the bank slug and triggers a local download of the CSV report file (`hdfc_bank-YYYY-MM-DD.csv`).
 
 ### Manual Email Client Drafting Flow (Automate Screen)
 If background integration is disabled:
 1. Upon completing the simulation timeline, the simulator opens the incoming email simulation modal.
-2. The modal features a **Draft Real Email** button.
-3. Clicking this button compiles the recipient list, subject line, and the formatted body (containing the inline CSV data and direct download URL).
+2. The modal features a **Draft Real Email** button, which dynamically acts on the currently selected bank tab.
+3. Clicking this button compiles the resolved recipient list, subject line, and formatted body (containing the inline CSV data and direct download URL) for the active bank tab.
 4. The system launches the user's default local mail client (`mailto:`) with all parameters pre-populated, allowing them to send the email with one click.
+
+### Fullstack Architecture & Offline Fallbacks
+* **Vercel Serverless Functions**: Located inside the `api/` folder:
+  - `api/emails.js`: Manages CRUD operations on recipients in server memory (retaining state across warm starts).
+  - `api/simulate.js`: Performs the compilation, bucket uploading, and background emailing workflows on the backend.
+* **Graceful Degradation**: On startup, adding, or deleting recipients, the frontend queries the `/api/emails` endpoint. If the backend is offline or the dashboard is served statically, it logs the unavailability and gracefully falls back to client-only localStorage and runtime execution modes.
 
 ---
 
@@ -265,29 +271,36 @@ If background integration is disabled:
 * [ ] Copy Button copies the bucket URL string to the clipboard and displays a clipboard-check visual cue for 2 seconds.
 * [ ] Go to Bucket button opens the correct Cloud Console browser URL in a new tab.
 
-### 4. Recipient Manager
+#### 4. Recipient Manager
 * [ ] The email input rejects invalid syntax formats, displaying red invalid indicators.
-* [ ] The email list renders chips dynamically from local storage.
-* [ ] Clicking the "X" button on any chip removes it from local storage with a fade transition.
+* [ ] The recipient directory supports associating each email with a specific bank or "All Banks" via a dropdown.
+* [ ] The recipient list renders chips color-coded according to the selected bank badge.
+* [ ] Adding or removing a recipient triggers immediate POST/DELETE synchronization with the backend API `/api/emails` (falling back to localStorage if offline).
+* [ ] Clicking the "X" button on any chip removes it with a fade transition.
 
 ### 5. Provider Options & Settings
 * [ ] Toggle switch successfully hides or shows the integration settings.
-* [ ] Dropdown selection toggles the display between Token-Based and Template-Based input fields.
+* [ ] Dropdown selection toggles the display between Web3Forms and EmailJS input fields.
 * [ ] "Save Configuration" persists entries in local storage and logs configuration updates to the terminal.
 
 ### 6. Simulation Timeline & Background Email Dispatch
-* [ ] Clicking "Trigger Simulation Flow" disables the button and steps through the timeline stages sequentially.
+* [ ] Clicking "Trigger Simulation Flow" disables the button, calls the Vercel backend `/api/simulate` serverless function, and plays the timeline steps sequentially over a 9.5-second sequence.
 * [ ] Active stages exhibit a pulsing animation, and completed stages show a checkmark status.
-* [ ] Background dispatch sends the message payload (subject, message body containing the inline CSV block and the URL containing `?download=firstbank-YYYY-MM-DD`) to the configured API endpoint.
+* [ ] Email inbox modal opens on completion and renders dynamic nav tabs for each compiled bank.
+* [ ] Background dispatch sends the message payload (subject, message body containing the inline CSV block and the parameter-driven direct download URL) via the serverless function to the configured API endpoint.
 
 ### 7. Auto-Download Workaround
-* [ ] Launching the portal URL with `?download=firstbank-YYYY-MM-DD` parses the date successfully.
-* [ ] The page initiates an automatic CSV download of `firstbank-YYYY-MM-DD.csv` within 1 second of loading.
+* [ ] Launching the portal URL with `?download=hdfc_bank-YYYY-MM-DD` parses the bank slug and date successfully.
+* [ ] The page initiates an automatic CSV download of `hdfc_bank-YYYY-MM-DD.csv` within 1 second of loading.
 * [ ] Auto-download events are appended to the system log terminal.
 
 ### 8. Manual Draft Fallback
-* [ ] Clicking "Draft Real Email" launches the system mail client.
-* [ ] Pre-populated body contains the inline CSV block and the direct download URL.
+* [ ] Clicking "Draft Real Email" on a specific bank tab in the inbox modal launches the system mail client.
+* [ ] Pre-populated body contains the inline CSV block and the direct download URL for that specific bank's recipients.
+
+### 9. Vercel Backend & Offline Fallbacks
+* [ ] Serverless endpoints in `/api` successfully handle requests.
+* [ ] The application remains fully functional in client-only fallback mode if `/api/*` endpoints are timed out or unreachable.
 
 ---
 
