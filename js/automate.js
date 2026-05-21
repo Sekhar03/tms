@@ -379,10 +379,20 @@ $(document).ready(function () {
                 if (emailConfig.provider === 'web3forms' && emailConfig.web3FormsKey) {
                     addLog('EMAIL', `Attempting background email transmission via Web3Forms...`);
                     
+                    const downloadUrl = window.location.href.split('?')[0] + '?download=firstbank-' + dateStr;
+                    const csvData = generateCSVText();
+                    
                     const emailSubject = `Daily Delivery Report: firstbank-${dateStr}`;
                     const emailMessage = `Dear Operations Team,\n\n` +
                         `The daily scheduled Terminal Delivery Status report has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
                         `Bucket Location:\n${bucketPath}\n\n` +
+                        `-----------------------------------------\n` +
+                        `REPORT DATA (CSV FORMAT):\n` +
+                        `-----------------------------------------\n` +
+                        `${csvData}\n` +
+                        `-----------------------------------------\n\n` +
+                        `Direct Download Link (Click to automatically download the CSV file):\n` +
+                        `${downloadUrl}\n\n` +
                         `Recipients: ${recipientListStr}\n\n` +
                         `Best Regards,\n` +
                         `iSupayX Terminal Automator`;
@@ -480,7 +490,8 @@ $(document).ready(function () {
                     $('#mockEmailModalOverlay').find('.alert-info').removeClass('alert-info').addClass('alert-success').html(
                         `<i class="bi bi-check-circle-fill text-success fs-5 mt-0.5"></i>
                          <div>
-                             <strong>Automated Dispatch Successful:</strong> The email has been sent successfully in the background to the configured recipients via ${providerName}. No additional manual steps are needed.
+                             <strong>Automated Dispatch Successful:</strong> The email has been sent successfully in the background to the configured recipients via ${providerName}.
+                             <br><span style="font-size: 0.78rem; opacity: 0.9;" class="d-block mt-1"><i class="bi bi-info-circle-fill"></i> <strong>Note:</strong> Free email endpoints (like Web3Forms/EmailJS free tier) do not support true file attachments. We have embedded the CSV report data as plain text and included a <strong>Direct Download Link</strong> in the email body so you can download the file directly from your email.</span>
                          </div>`
                     );
                     $('#btnSendRealMail').hide(); // Hide draft button since it's already sent
@@ -547,13 +558,21 @@ $(document).ready(function () {
         const dateStr = now.getFullYear() + '-' + 
             String(now.getMonth() + 1).padStart(2, '0') + '-' + 
             String(now.getDate()).padStart(2, '0');
+        const downloadUrl = window.location.href.split('?')[0] + '?download=firstbank-' + dateStr;
+        const csvData = generateCSVText();
         const subject = encodeURIComponent(`Daily Delivery Report: firstbank-${dateStr}`);
         const body = encodeURIComponent(
             `Dear Operations Team,\n\n` +
             `The daily scheduled Terminal Delivery Status report has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
             `Bucket Location:\n` +
             `gs://tms-delivery-bucket/reports/firstbank-${dateStr}.xlsx\n\n` +
-            `Please download the attached delivery report file generated from the dashboard.\n\n` +
+            `-----------------------------------------\n` +
+            `REPORT DATA (CSV FORMAT):\n` +
+            `-----------------------------------------\n` +
+            `${csvData}\n` +
+            `-----------------------------------------\n\n` +
+            `Direct Download Link (Click to automatically download the CSV file):\n` +
+            `${downloadUrl}\n\n` +
             `Best Regards,\n` +
             `iSupayX Terminal Automator`
         );
@@ -567,4 +586,29 @@ $(document).ready(function () {
     loadEmailConfig();
     loadLogs();
     renderLogs();
+
+    // Check for auto-download parameter in URL (Workaround for free email service providers)
+    const urlParams = new URLSearchParams(window.location.search);
+    const downloadParam = urlParams.get('download');
+    if (downloadParam) {
+        // Extract date from download param: firstbank-YYYY-MM-DD
+        let dateStr = downloadParam.replace('firstbank-', '');
+        // Validate date format (YYYY-MM-DD)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            setTimeout(() => {
+                downloadDemoFile(dateStr);
+                addLog('SYSTEM', `Auto-downloaded report file for date: ${dateStr} (triggered via email download link)`);
+            }, 1000); // Small timeout to ensure page and logs are fully loaded/rendered
+        } else {
+            // Fallback: use current date
+            const now = new Date();
+            const fallbackDate = now.getFullYear() + '-' + 
+                String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(now.getDate()).padStart(2, '0');
+            setTimeout(() => {
+                downloadDemoFile(fallbackDate);
+                addLog('SYSTEM', `Auto-downloaded report file for current date (invalid URL parameter format)`);
+            }, 1000);
+        }
+    }
 });
