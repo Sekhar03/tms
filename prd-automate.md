@@ -60,7 +60,6 @@ The Automate Mail Module addresses several operational challenges:
   - *Template-Based API Service:* Links template variables to dispatch personalized reports to multiple mail accounts.
 * **Scheduler Simulator & Visual Logs:** A real-time timeline visualizer showing compilation, storage archive uploads, recipient resolution, and dispatch success. A logging terminal outputs verbose logs.
 * **Auto-Download System (Free-Tier Workaround):** 
-  - Embeds the CSV data directly inside the email body.
   - Includes a unique page link in the email that, when clicked, triggers an instant browser download of the CSV report.
 
 ---
@@ -120,7 +119,6 @@ If background integration is enabled:
 2. It generates direct download URLs containing bank folders and date parameters (e.g. `?download=hdfc-YYYY-MM-DD`).
 3. It builds the email message body containing:
    - Google Cloud Storage archive paths following the structure `gs://tms-indent-bucket/<Bank>/<Year>/<Month>/<Date>/<filename>`.
-   - Inline report data printed as a formatted text block.
    - A direct download hyperlink containing the parameter.
 4. The message payload is sent directly from the serverless backend (bypassing browser CORS restrictions and protecting access keys) to the selected background dispatch endpoint.
 5. On success, the simulator triggers a browser download of the primary report and opens the incoming email simulation modal.
@@ -133,7 +131,7 @@ If background integration is enabled:
 If background integration is disabled:
 1. Upon completing the simulation timeline, the simulator opens the incoming email simulation modal.
 2. The modal features a **Draft Real Email** button, which dynamically acts on the currently selected bank tab.
-3. Clicking this button compiles the resolved recipient list, subject line, and formatted body (containing the inline CSV data and direct download URL) for the active bank tab.
+3. Clicking this button compiles the resolved recipient list, subject line, and formatted body (containing the GCS bucket path and direct download URL) for the active bank tab.
 4. The system launches the user's default local mail client (`mailto:`) with all parameters pre-populated, allowing them to send the email with one click.
 
 ### Fullstack Architecture & Offline Fallbacks
@@ -166,7 +164,7 @@ If background integration is disabled:
 * [ ] Clicking "Trigger Simulation Flow" disables the button, calls the Vercel backend `/api/simulate` serverless function, and plays the timeline steps sequentially over a 9.5-second sequence.
 * [ ] Active stages exhibit a pulsing animation, and completed stages show a checkmark status.
 * [ ] Email inbox modal opens on completion and renders dynamic nav tabs for each compiled bank.
-* [ ] Background dispatch sends the message payload (subject, message body containing the inline CSV block and the parameter-driven direct download URL) via the serverless function to the configured API endpoint.
+* [ ] Background dispatch sends the message payload (subject, message body containing the GCS bucket path and the parameter-driven direct download URL) via the serverless function to the configured API endpoint.
 
 ### 5. Auto-Download Workaround
 * [ ] Launching the portal URL with `?download=hdfc_bank-YYYY-MM-DD` parses the bank slug and date successfully.
@@ -175,7 +173,7 @@ If background integration is disabled:
 
 ### 6. Manual Draft Fallback
 * [ ] Clicking "Draft Real Email" on a specific bank tab in the inbox modal launches the system mail client.
-* [ ] Pre-populated body contains the inline CSV block and the direct download URL for that specific bank's recipients.
+* [ ] Pre-populated body contains the GCS bucket path and the direct download URL for that specific bank's recipients.
 
 ### 7. Vercel Backend & Offline Fallbacks
 * [ ] Serverless endpoints in `/api` successfully handle requests.

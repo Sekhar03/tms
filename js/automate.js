@@ -637,11 +637,6 @@ $(document).ready(function () {
                     message: `Dear Operations Team,\n\n` +
                         `The daily scheduled Indent Report for ${bank} (uploaded yesterday between 12:00 PM and 11:59 PM) has been compiled and saved under the corresponding date folder in Google Cloud Storage.\n\n` +
                         `Bucket Location:\n${bucketPath}\n\n` +
-                        `-----------------------------------------\n` +
-                        `INLINE CSV EXCERPT:\n` +
-                        `-----------------------------------------\n` +
-                        `${csvData}\n` +
-                        `-----------------------------------------\n\n` +
                         `Direct Download Link (Click to automatically download the indent file):\n` +
                         `${downloadUrl}\n\n` +
                         `Recipients: ${recipientListStr}\n\n` +
