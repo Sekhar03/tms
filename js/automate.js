@@ -304,6 +304,30 @@ $(document).ready(function () {
         downloadDemoFile(dateStr);
     });
 
+    $('#btnSendRealMail').on('click', function () {
+        if (emails.length === 0) {
+            alert('No recipients configured to draft email.');
+            return;
+        }
+        const recipientList = emails.join(',');
+        const now = new Date();
+        const dateStr = now.getFullYear() + '-' + 
+            String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(now.getDate()).padStart(2, '0');
+        const subject = encodeURIComponent(`Daily Delivery Report: firstbank-${dateStr}`);
+        const body = encodeURIComponent(
+            `Dear Operations Team,\n\n` +
+            `The daily scheduled Terminal Delivery Status report has been compiled and archived in our Google Cloud Storage bucket.\n\n` +
+            `Bucket Location:\n` +
+            `gs://tms-delivery-bucket/reports/firstbank-${dateStr}.xlsx\n\n` +
+            `Please download the attached delivery report file generated from the dashboard.\n\n` +
+            `Best Regards,\n` +
+            `iSupayX Terminal Automator`
+        );
+        window.location.href = `mailto:${recipientList}?subject=${subject}&body=${body}`;
+        addLog('EMAIL', `Opened local mail client to draft email to: [${emails.join(', ')}]`);
+    });
+
     // Initialize Page
     loadEmails();
     renderEmails();

@@ -318,6 +318,14 @@
                 </div>
             </div>
             <div class="p-4 bg-white" style="font-size: 0.88rem; line-height: 1.6; color: #334155; min-height: 180px; text-align: left;">
+                <!-- Sandbox mode disclaimer -->
+                <div class="alert alert-info border-0 d-flex gap-2 p-3 mb-3" style="background-color: rgba(59, 130, 246, 0.08); color: #1e3a8a; border-radius: 8px; font-size: 0.82rem; line-height: 1.4;">
+                    <i class="bi bi-info-circle-fill text-primary fs-5 mt-0.5"></i>
+                    <div>
+                        <strong>Simulation Sandbox:</strong> Since this is a frontend portal, automated background emails cannot be sent. You can download the generated report below, or click <strong>Draft Real Email</strong> to open your local mail client with the recipients pre-filled.
+                    </div>
+                </div>
+
                 <p>Dear Operations Team,</p>
                 <p>The daily scheduled Terminal Delivery Status report has been compiled and archived in our Google Cloud Storage bucket.</p>
                 <p><strong>Bucket Location:</strong><br>
@@ -341,6 +349,9 @@
                 </div>
             </div>
             <div class="p-3 bg-light text-end border-top">
+                <button type="button" class="btn btn-primary btn-sm px-4 py-1.5 fw-semibold me-2" id="btnSendRealMail" style="background-color: #3b82f6; border: none;">
+                    <i class="bi bi-envelope-fill me-1"></i> Draft Real Email
+                </button>
                 <button type="button" class="btn btn-secondary btn-sm px-4 py-1.5 fw-semibold" id="btnDismissEmailModal">Close</button>
             </div>
         </div>
