@@ -387,23 +387,30 @@ $(document).ready(function () {
                         `Best Regards,\n` +
                         `iSupayX Terminal Automator`;
 
+                    // Create CSV attachment
+                    const csvContent = generateCSVText();
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const file = new File([blob], `firstbank-${dateStr}.csv`, { type: 'text/csv' });
+
+                    // Create FormData with attachment
+                    const formData = new FormData();
+                    formData.append('access_key', emailConfig.web3FormsKey);
+                    formData.append('subject', emailSubject);
+                    formData.append('from_name', 'iSupayX Terminal Automator');
+                    formData.append('message', emailMessage);
+                    formData.append('attachment', file);
+
                     fetch('https://api.web3forms.com/submit', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({
-                            access_key: emailConfig.web3FormsKey,
-                            subject: emailSubject,
-                            from_name: 'iSupayX Terminal Automator',
-                            message: emailMessage
-                        })
+                        body: formData
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            addLog('SUCCESS', `Email sent successfully in background via Web3Forms!`);
+                            addLog('SUCCESS', `Email sent successfully in background via Web3Forms (with attachment)!`);
                             completeDispatch(true, 'Web3Forms');
                         } else {
                             addLog('SYSTEM', `ERROR: Web3Forms background transmission failed: ${data.message || 'Unknown error'}`);
@@ -496,14 +503,18 @@ $(document).ready(function () {
         simTimeoutIds.push(id);
     });
 
+    // Helper to compile CSV content
+    function generateCSVText() {
+        let csv = "Delivery ID,Order ID,Bank,Courier Partner,AWB Number,Delivery Status,Estimated Delivery\n";
+        csv += "DEL90021,ORD77309,FirstBank,BlueDart,AWB998822,Delivered,2026-05-19\n";
+        csv += "DEL90022,ORD77310,FirstBank,Delhivery,AWB998823,In Transit,2026-05-21\n";
+        csv += "DEL90023,ORD77311,FirstBank,Delhivery,AWB998824,Delivered,2026-05-20\n";
+        return csv;
+    }
+
     // Helper: Generate and download demo CSV file
     function downloadDemoFile(dateStr) {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Delivery ID,Order ID,Bank,Courier Partner,AWB Number,Delivery Status,Estimated Delivery\n";
-        csvContent += `DEL90021,ORD77309,FirstBank,BlueDart,AWB998822,Delivered,2026-05-19\n`;
-        csvContent += `DEL90022,ORD77310,FirstBank,Delhivery,AWB998823,In Transit,2026-05-21\n`;
-        csvContent += `DEL90023,ORD77311,FirstBank,Delhivery,AWB998824,Delivered,2026-05-20\n`;
-        
+        const csvContent = "data:text/csv;charset=utf-8," + generateCSVText();
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
