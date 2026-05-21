@@ -48,7 +48,7 @@ The purpose of the Automated Email Reports Module is to allow operators to manag
 The portal provides a visual simulator to let operators run a mock version of the automated process:
 1. **The Automated Checklist (Timeline):**
    - **Step 1: Fetch & Compile Indent Files:** The system collects all indent files uploaded by operators between **12:00 PM and 11:59 PM** on the previous day.
-   - **Step 2: Save Indents to Bucket:** The system organizes and stores the collected files under bank-specific, date-wise folders in cloud storage (e.g. `HDFC > 2026 > January > 17-Jan > indent_file.xlsx`).
+   - **Step 2: Organize Indents in Cloud Storage:** The system organizes and stores the collected files under bank-specific, date-wise folders in cloud storage (e.g. `HDFC > 2026 > January > 17-Jan > Indent File`).
    - **Step 3: Extract File & Resolve Emails:** At **9:00 AM** the next morning, the scheduler looks up the recipient list to determine who should receive emails for each bank.
    - **Step 4: Dispatch Automated Mail:** The system prepares and sends the emails containing the secure cloud links to the resolved recipients.
 2. **Execution Logs:** As the simulation runs, a log console prints simple, readable status updates showing exactly what the scheduler is doing at each step.
