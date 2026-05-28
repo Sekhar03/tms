@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ISU Soundbox Portal</title>
+    <title>Bulk Upload Modules - ISU Soundbox Portal</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -11,14 +11,14 @@
     <!-- Custom Google Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Portal Redesign CSS -->
-    <link href="css/portal.css?v=2" rel="stylesheet">
+    <link href="../css/portal.css?v=2" rel="stylesheet">
 </head>
 <body>
 
     <!-- Header Section -->
     <header class="portal-header">
         <div class="d-flex align-items-center gap-3">
-            <a href="index.html" class="portal-brand">
+            <a href="../index.html" class="portal-brand">
                 <span class="portal-logo-text">iServe<span>U</span></span>
                 <span class="portal-subtitle">Soundbox Portal</span>
             </a>
@@ -47,7 +47,7 @@
             <ul class="portal-sidebar-nav">
                 <!-- Dashboard Link -->
                 <li class="portal-nav-item">
-                    <a href="index.html" class="portal-nav-link active" id="nav-dashboard">
+                    <a href="../index.html" class="portal-nav-link" id="nav-dashboard">
                         <i class="bi bi-grid-fill portal-nav-icon"></i>
                         <span>Dashboard</span>
                     </a>
@@ -65,7 +65,7 @@
                     <div class="collapse show" id="tmsSubmenu">
                         <ul class="submenu-nav">
                             <li>
-                                <a href="pages/merchant-denial.html" class="portal-nav-link" id="nav-merchant-denial">
+                                <a href="merchant-denial.html" class="portal-nav-link" id="nav-merchant-denial">
                                     <i class="bi bi-file-earmark-x-fill portal-nav-icon"></i>
                                     <span>Merchant Denial Upload</span>
                                 </a>
@@ -98,7 +98,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="pages/bulk-upload.html" class="portal-nav-link" id="nav-bulk-upload">
+                                <a href="bulk-upload.html" class="portal-nav-link active" id="nav-bulk-upload">
                                     <i class="bi bi-cloud-arrow-up-fill portal-nav-icon"></i>
                                     <span>Bulk Upload</span>
                                 </a>
@@ -144,27 +144,67 @@
 
         <!-- Main Content Area -->
         <main class="portal-main-content">
-            <h1 class="mb-4" style="color: var(--portal-text-dark); font-weight: 700; font-size: 1.8rem;">Dashboard Overview</h1>
+            <h1 class="mb-4" style="color: var(--portal-text-dark); font-weight: 700; font-size: 1.8rem;">Bulk Upload Modules</h1>
             
             <div class="row g-4 mt-2">
-                <!-- Merchant Denial Module Card -->
+                <!-- Box 1: Add to Inventory -->
                 <div class="col-12 col-md-6 col-lg-4">
-                    <a href="pages/merchant-denial.html" class="dashboard-module-card functional-card" id="merchant-denial-card-btn" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 200px;">
-                        <div style="width: 64px; height: 64px; border-radius: 50%; background-color: #e0f2fe; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: #00b4d8; font-size: 1.8rem;">
-                            <i class="bi bi-file-earmark-x-fill"></i>
+                    <a href="bulk-upload-form.html?type=Add%20to%20Inventory" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
+                        <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #f0fdf4; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #16a34a; font-size: 1.5rem;">
+                            <i class="bi bi-plus-circle-fill"></i>
                         </div>
-                        <span style="font-weight: 700; color: #1e293b; font-size: 1.1rem; text-align: center;">Merchant Denial Report</span>
+                        <span style="font-weight: 700; color: #1e293b; font-size: 1rem; text-align: center;">Add to Inventory</span>
                     </a>
                 </div>
 
-                <!-- Central Ops Card (Dummy, disabled) -->
+                <!-- Box 2: Bank Code Inventory -->
                 <div class="col-12 col-md-6 col-lg-4">
-                    <div class="dashboard-module-card dummy-card" id="central-ops-btn" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 200px; opacity: 0.7; cursor: not-allowed;">
-                        <div style="width: 64px; height: 64px; border-radius: 50%; background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: #64748b; font-size: 1.8rem;">
-                            <i class="bi bi-megaphone-fill"></i>
+                    <a href="bulk-upload-form.html?type=Bank%20Code%20Inventory" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
+                        <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #eff6ff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #2563eb; font-size: 1.5rem;">
+                            <i class="bi bi-bank"></i>
                         </div>
-                        <span style="font-weight: 700; color: #64748b; font-size: 1.1rem; text-align: center;">Central Ops</span>
-                    </div>
+                        <span style="font-weight: 700; color: #1e293b; font-size: 1rem; text-align: center;">Bank Code Inventory</span>
+                    </a>
+                </div>
+
+                <!-- Box 3: Inventory Removal -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="bulk-upload-form.html?type=Inventory%20Removal" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
+                        <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #fef2f2; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #dc2626; font-size: 1.5rem;">
+                            <i class="bi bi-trash-fill"></i>
+                        </div>
+                        <span style="font-weight: 700; color: #1e293b; font-size: 1rem; text-align: center;">Inventory Removal</span>
+                    </a>
+                </div>
+
+                <!-- Box 4: Delivery Status Update -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="bulk-upload-form.html?type=Delivery%20Status%20Update" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
+                        <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #faf5ff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #9333ea; font-size: 1.5rem;">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <span style="font-weight: 700; color: #1e293b; font-size: 1rem; text-align: center;">Delivery Status Update</span>
+                    </a>
+                </div>
+
+                <!-- Box 5: Device Installation -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="bulk-upload-form.html?type=Device%20Installation" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
+                        <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #fff7ed; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #ea580c; font-size: 1.5rem;">
+                            <i class="bi bi-gear-fill"></i>
+                        </div>
+                        <span style="font-weight: 700; color: #1e293b; font-size: 1rem; text-align: center;">Device Installation</span>
+                    </a>
+                </div>
+
+                <!-- Box 6: Merchant Denial Report -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="merchant-denial.html" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
+                        <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #e0f2fe; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #00b4d8; font-size: 1.5rem;">
+                            <i class="bi bi-file-earmark-x-fill"></i>
+                        </div>
+                        <span style="font-weight: 700; color: #1e293b; font-size: 1rem; text-align: center;">Merchant Denial Report</span>
+                    </a>
                 </div>
             </div>
         </main>
