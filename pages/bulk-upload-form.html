@@ -35,6 +35,7 @@
                     <span id="selected-bank-code">Bank of Baroda</span>
                 </a>
                 <ul class="dropdown-menu shadow border-0 mt-2" style="border-radius: 12px; font-size: 0.9rem;">
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="All Banks">All Banks</a></li>
                     <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="Bank of Baroda">Bank of Baroda</a></li>
                     <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="HDFC Bank">HDFC Bank</a></li>
                     <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="ICICI Bank">ICICI Bank</a></li>
@@ -231,8 +232,9 @@
 
         // Globally Selected Bank handling
         $(document).ready(function() {
-            const savedBank = localStorage.getItem('selectedBank') || 'Bank of Baroda';
-            $('#selected-bank-code').text(savedBank);
+            // Automatically select 'All Banks' when clicking / opening Bulk Upload Form
+            localStorage.setItem('selectedBank', 'All Banks');
+            $('#selected-bank-code').text('All Banks');
 
             $('.bank-option').on('click', function(e) {
                 e.preventDefault();
