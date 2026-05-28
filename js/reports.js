@@ -201,7 +201,7 @@ $(document).ready(function () {
     $('#download-sample-btn').on('click', function (e) {
         e.preventDefault();
         
-        const bank = $('#bankSelect').val() || 'Bank_of_Baroda';
+        const bank = localStorage.getItem('selectedBank') || 'Bank_of_Baroda';
         const reportType = $('#reportTypeSelect').val();
 
         if (!reportType) {
