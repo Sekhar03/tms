@@ -3,218 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merchant Denial - ISU Admin Dashboard</title>
+    <title>Merchant Denial - ISU Soundbox Portal</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Custom Style for Reports Page (shares same style) -->
-    <link href="../css/reports.css?v=4" rel="stylesheet">
+    <!-- Custom Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Portal Redesign CSS -->
+    <link href="../css/portal.css?v=2" rel="stylesheet">
 </head>
 <body>
 
     <!-- Header Section -->
-    <header class="isu-header d-flex justify-content-between align-items-center px-3">
-        <div class="header-left d-flex align-items-center">
-            <div class="isu-logo-circle d-flex align-items-center justify-content-center">
-                <span class="isu-logo-text">isu</span>
-            </div>
-            <span class="isu-brand-name ms-2">Iserveu</span>
-            <button class="btn sidebar-toggle-btn text-white ms-3" type="button" aria-label="Toggle navigation">
-                <i class="bi bi-list"></i>
+    <header class="portal-header">
+        <div class="d-flex align-items-center gap-3">
+            <a href="../index.html" class="portal-brand">
+                <span class="portal-logo-text">iServe<span>U</span></span>
+                <span class="portal-subtitle">Soundbox Portal</span>
+            </a>
+            <button class="hamburger-btn" type="button" aria-label="Toggle navigation" id="sidebarToggle">
+                <i class="bi bi-list text-dark fs-4"></i>
             </button>
         </div>
         
-        <div class="header-right d-flex align-items-center gap-3">
-            <div class="wallet-badge text-white d-flex align-items-center gap-2">
-                <i class="bi bi-wallet2"></i>
-                <span>W1: ₹56,976,869.51</span>
-            </div>
-            <div class="wallet-badge text-white d-flex align-items-center gap-2">
-                <i class="bi bi-wallet2"></i>
-                <span>W2: ₹0.00</span>
-            </div>
-            <div class="user-dropdown dropdown">
-                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center gap-2 px-3 py-1 text-white border-0 rounded-pill" style="background: rgba(255,255,255,0.15);" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle"></i>
-                    <span>COMMON ADMIN</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                </ul>
-            </div>
-            <button class="btn settings-btn text-white p-0" type="button" aria-label="Settings">
-                <i class="bi bi-gear-fill"></i>
+        <div class="d-flex align-items-center gap-3">
+            <!-- Bank Dropdown Pill -->
+            <a href="#" class="bank-selector-pill">
+                <i class="bi bi-bank"></i>
+                <span>Bank of Baroda</span>
+                <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+            </a>
+            
+            <!-- Profile Avatar Icon -->
+            <button class="profile-avatar-btn" type="button" aria-label="User profile">
+                <i class="bi bi-person-fill text-white"></i>
             </button>
         </div>
     </header>
 
-    <div class="isu-wrapper">
+    <div class="portal-wrapper">
         <!-- Sidebar Navigation -->
-        <aside class="isu-sidebar text-white">
-            <div class="sidebar-header">
-                <span class="sidebar-title">NAVIGATION</span>
-            </div>
-            <ul class="nav flex-column sidebar-nav">
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item" id="sidebar-dashboard-link">
-                        <i class="bi bi-speedometer2 nav-icon"></i>
-                        <span class="nav-text">Dashboard</span>
+        <aside class="portal-sidebar">
+            <ul class="portal-sidebar-nav">
+                <!-- Dashboard Link -->
+                <li class="portal-nav-item">
+                    <a href="../index.html" class="portal-nav-link" id="nav-dashboard">
+                        <i class="bi bi-grid-fill portal-nav-icon"></i>
+                        <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item" id="sidebar-reports-link">
-                        <i class="bi bi-file-earmark-text nav-icon"></i>
-                        <span class="nav-text">Reports</span>
-                    </a>
+                
+                <!-- Master TMS Section (Collapsible) -->
+                <li class="portal-nav-item">
+                    <button class="category-header-btn" type="button" data-bs-toggle="collapse" data-bs-target="#tmsSubmenu" aria-expanded="true">
+                        <span>
+                            <i class="bi bi-clipboard-data-fill me-2" style="font-size: 1rem; vertical-align: middle;"></i>
+                            Master TMS
+                        </span>
+                        <i class="bi bi-chevron-up chevron-indicator"></i>
+                    </button>
+                    <div class="collapse show" id="tmsSubmenu">
+                        <ul class="submenu-nav">
+                            <li>
+                                <a href="merchant-denial.html" class="portal-nav-link active" id="nav-merchant-denial">
+                                    <i class="bi bi-file-earmark-x-fill portal-nav-icon"></i>
+                                    <span>Merchant Denial Upload</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-cash nav-icon"></i>
-                        <span class="nav-text">Finance Function</span>
-                    </a>
+
+                <!-- Pre-QC Modules Section (Collapsible) -->
+                <li class="portal-nav-item">
+                    <button class="category-header-btn" type="button" data-bs-toggle="collapse" data-bs-target="#preQcSubmenu" aria-expanded="true">
+                        <span>
+                            <i class="bi bi-shield-check-fill me-2" style="font-size: 1rem; vertical-align: middle;"></i>
+                            Pre-QC Modules
+                        </span>
+                        <i class="bi bi-chevron-up chevron-indicator"></i>
+                    </button>
+                    <div class="collapse show" id="preQcSubmenu">
+                        <ul class="submenu-nav">
+                            <li>
+                                <a href="#" class="portal-nav-link disabled-sidebar-item">
+                                    <i class="bi bi-clipboard-fill portal-nav-icon"></i>
+                                    <span>Device Mapping</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="portal-nav-link disabled-sidebar-item">
+                                    <i class="bi bi-gear-fill portal-nav-icon"></i>
+                                    <span>Device Installation</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="reports.html" class="portal-nav-link" id="nav-delivery-report">
+                                    <i class="bi bi-file-earmark-arrow-up-fill portal-nav-icon"></i>
+                                    <span>Delivery Report Upload</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="portal-nav-link disabled-sidebar-item">
+                                    <i class="bi bi-arrow-left-right portal-nav-icon"></i>
+                                    <span>RTO</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-people nav-icon"></i>
-                        <span class="nav-text">Client User Mgmt.</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-people nav-icon"></i>
-                        <span class="nav-text">Internal User Mgmt.</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-headset nav-icon"></i>
-                        <span class="nav-text">Support Function</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-shield-check nav-icon"></i>
-                        <span class="nav-text">FRM</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-sliders nav-icon"></i>
-                        <span class="nav-text">Centralize Ops</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="bi bi-person-plus nav-icon"></i>
-                            <span class="nav-text">Common Onboarding</span>
-                        </div>
-                        <i class="bi bi-chevron-right chevron-icon"></i>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-percent nav-icon"></i>
-                        <span class="nav-text">Commission Setting</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled-sidebar-item">
-                        <i class="bi bi-search nav-icon"></i>
-                        <span class="nav-text">Audit Trail</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="tms.html" class="nav-link active" id="sidebar-tms-link">
-                        <i class="bi bi-volume-up nav-icon"></i>
-                        <span class="nav-text">TMS</span>
-                    </a>
+
+                <!-- Reports Section (Collapsible) -->
+                <li class="portal-nav-item">
+                    <button class="category-header-btn" type="button" data-bs-toggle="collapse" data-bs-target="#reportsSubmenu" aria-expanded="true">
+                        <span>
+                            <i class="bi bi-graph-up-arrow me-2" style="font-size: 1rem; vertical-align: middle;"></i>
+                            Reports
+                        </span>
+                        <i class="bi bi-chevron-up chevron-indicator"></i>
+                    </button>
+                    <div class="collapse show" id="reportsSubmenu">
+                        <ul class="submenu-nav">
+                            <li>
+                                <a href="#" class="portal-nav-link disabled-sidebar-item">
+                                    <i class="bi bi-gemini portal-nav-icon"></i>
+                                    <span>Device QC Reports</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="portal-nav-link disabled-sidebar-item">
+                                    <i class="bi bi-file-earmark-medical-fill portal-nav-icon"></i>
+                                    <span>Device Installation Reports</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
             </ul>
         </aside>
 
         <!-- Main Content Area -->
-        <main class="isu-main-content">
-            <!-- Main Form Container matching layout -->
-            <div class="custom-card-container">
-                <!-- Teal Header Bar inside card -->
-                <div class="custom-card-header d-flex align-items-center justify-content-between position-relative">
-                    <a href="tms.html" class="back-circle-btn d-flex align-items-center justify-content-center" title="Back to TMS">
-                        <i class="bi bi-chevron-left text-white fs-5" style="font-weight: 800;"></i>
-                    </a>
-                    <h2 class="custom-card-title m-0 text-white fw-bold mx-auto text-center position-absolute start-50 translate-middle-x" id="dynamicCardTitle">
-                        Merchant Denied Report Upload
-                    </h2>
-                    <!-- Right empty placeholder to balance back button flex space -->
-                    <div style="width: 34px;"></div>
-                </div>
-
-                <!-- Card Body -->
-                <div class="custom-card-body p-4 p-md-5">
+        <main class="portal-main-content">
+            <!-- Custom Portal Card matching screenshot -->
+            <div class="portal-card">
+                <div class="portal-card-header">
+                    <h2 class="portal-card-title">Upload Merchant Denial Reports</h2>
                     
-                    <!-- Red note matching layout exactly -->
-                    <div class="text-center mb-4">
-                        <p class="red-note m-0 fw-semibold" id="dynamicNote">
-                            Note : File should contain merchant denied data only
-                        </p>
-                    </div>
-
-                    <!-- Download Link on the right side -->
-                    <div class="d-flex justify-content-end mb-4">
-                        <button type="button" class="btn-sample-download d-flex align-items-center gap-2" id="download-sample-btn">
-                            <i class="bi bi-arrow-down-circle-fill fs-5"></i>
-                            <span>Download Sample Excel Sheet</span>
-                        </button>
-                    </div>
-
-                    <!-- Form Submission -->
-                    <form id="tmsInventoryForm" novalidate>
-                        <div class="row g-4 mb-4">
-                            <!-- Select Bank Code Field -->
-                            <div class="col-12 col-md-6">
-                                <label for="bankSelect" class="custom-form-label fw-semibold mb-2">
-                                    Select Bank Code <i class="bi bi-info-circle-fill text-muted ms-1 info-tooltip" title="Select appropriate Bank Code"></i>
-                                </label>
-                                <select class="form-select custom-select" id="bankSelect" required>
-                                    <option value="" selected disabled>Select Bank</option>
-                                    <option value="HDFC Bank">HDFC Bank</option>
-                                    <option value="ICICI Bank">ICICI Bank</option>
-                                    <option value="Axis Bank">Axis Bank</option>
-                                    <option value="SBI">SBI</option>
-                                    <option value="Yes Bank">Yes Bank</option>
-                                    <option value="Kotak Bank">Kotak Bank</option>
-                                </select>
-                                <div class="invalid-feedback">Bank is required.</div>
-                            </div>
-                        </div>
-
-                        <!-- Row 2: File upload and Submit Button -->
-                        <div class="row g-4 align-items-end mb-4">
-                            <!-- Upload Excel Sheet field -->
-                            <div class="col-12 col-md-6" id="fileUploadContainer">
-                                <div class="input-group custom-upload-group">
-                                    <span class="input-group-text bg-white border-end-0 text-muted px-3"><i class="bi bi-paperclip"></i></span>
-                                    <input type="text" id="fileNameDisplay" class="form-control bg-white border-start-0 border-end-0 py-2" placeholder="Upload Excel Sheet" readonly required>
-                                    <button class="btn btn-browse px-4 fw-semibold" type="button" id="browseBtn">Browse</button>
-                                </div>
-                                <input type="file" id="fileInput" name="reportFile" class="d-none" accept=".xls,.xlsx,.csv">
-                                <div class="text-danger small mt-1 fw-semibold">
-                                    <i class="bi bi-exclamation-circle me-1"></i>Max file size: 10 MB &nbsp;|&nbsp; Allowed: .xls, .xlsx, .csv
-                                </div>
-                                <div class="error-msg-text text-danger small mt-1 d-none" id="file-error-message">File is required</div>
-                            </div>
-
-                            <!-- Upload Submit Button -->
-                            <div class="col-12 col-md-6">
-                                <button type="submit" class="btn btn-upload-submit w-100 py-2 fw-semibold text-white">Upload</button>
-                            </div>
-                        </div>
-                    </form>
+                    <!-- Download Link exactly like screenshot (teal underlined, green/teal circle with down arrow) -->
+                    <button type="button" class="download-sample-btn" id="download-sample-btn">
+                        <span class="download-icon-circle"><i class="bi bi-download"></i></span>
+                        <span>Download Sample Excel Sheet</span>
+                    </button>
                 </div>
+
+                <!-- Form Layout aligned side-by-side horizontally -->
+                <form id="tmsInventoryForm" novalidate>
+                    <div class="form-horizontal-row">
+                        <!-- Select Bank dropdown -->
+                        <div style="flex: 1; min-width: 250px;">
+                            <label for="bankSelect" class="form-label-small">Select Service Aggregator</label>
+                            <select class="form-select-custom" id="bankSelect" required>
+                                <option value="" selected disabled>Select Bank</option>
+                                <option value="HDFC Bank">HDFC Bank</option>
+                                <option value="ICICI Bank">ICICI Bank</option>
+                                <option value="Axis Bank">Axis Bank</option>
+                                <option value="SBI">SBI</option>
+                                <option value="Yes Bank">Yes Bank</option>
+                                <option value="Kotak Bank">Kotak Bank</option>
+                            </select>
+                            <div class="invalid-feedback">Bank is required.</div>
+                        </div>
+
+                        <!-- Upload File Input styled exactly -->
+                        <div style="flex: 1.5; min-width: 300px;">
+                            <label class="form-label-small">Upload Excel Sheet</label>
+                            <div class="file-upload-group">
+                                <span class="file-upload-icon"><i class="bi bi-cloud-upload-fill"></i></span>
+                                <input type="text" id="fileNameDisplay" class="file-upload-text" placeholder="Choose .xlsx file" readonly required>
+                                <button class="btn-browse-custom" type="button" id="browseBtn">Browse</button>
+                            </div>
+                            <input type="file" id="fileInput" name="reportFile" class="d-none" accept=".xls,.xlsx,.csv">
+                            <div class="text-danger small mt-1 d-none" id="file-error-message">File is required</div>
+                        </div>
+
+                        <!-- Upload Button -->
+                        <div style="flex: 0.5; min-width: 150px;">
+                            <button type="submit" class="btn-upload-action">
+                                <i class="bi bi-cloud-upload-fill"></i> Upload
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </main>
     </div>
@@ -228,6 +208,26 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom Application JS -->
-    <script src="../js/merchant-denial.js?v=1"></script>
+    <script src="../js/merchant-denial.js?v=2"></script>
+    
+    <script>
+        // Collapsible sidebar chevron toggle
+        $('.category-header-btn').on('click', function() {
+            const indicator = $(this).find('.chevron-indicator');
+            setTimeout(() => {
+                const isExpanded = $(this).attr('aria-expanded') === 'true';
+                if (isExpanded) {
+                    indicator.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+                } else {
+                    indicator.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+                }
+            }, 100);
+        });
+
+        // Mobile toggle
+        $('#sidebarToggle').on('click', function() {
+            $('.portal-sidebar').toggleClass('show');
+        });
+    </script>
 </body>
 </html>
