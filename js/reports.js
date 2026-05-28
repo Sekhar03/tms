@@ -46,14 +46,11 @@ $(document).ready(function () {
     // Dynamic UI updates based on Select Report Type selection
     function updateReportTypeUI() {
         const reportType = $('#reportTypeSelect').val();
-        let titleText = "Merchant Denied Report Upload";
-        let noteText = "Note : File should contain merchant denied data only";
-        let successMsg = "Merchant denied report uploaded successfully";
+        let titleText = "Indent Path Submission";
+        let noteText = "Submit request to generate indent path records";
+        let successMsg = "Indent path report generated successfully";
 
         if (reportType === "Indent Path") {
-            titleText = "Indent Path Submission";
-            noteText = "Submit request to generate indent path records";
-            successMsg = "Indent path report generated successfully";
             $('#fileUploadContainer').hide();
             $('.btn-upload-submit').text('Submit');
         } else {
@@ -104,7 +101,7 @@ $(document).ready(function () {
         console.log("Form submission validation passed:", { bank, reportType, fileName: selectedFile ? selectedFile.name : null });
 
         // Build success message
-        let successMsg = 'Merchant denied report uploaded successfully';
+        let successMsg = '';
         if (reportType === 'Indent Path')   successMsg = 'Indent path report generated successfully';
         if (reportType === 'Delivery Report') successMsg = 'Delivery report uploaded successfully';
 
@@ -216,19 +213,13 @@ $(document).ready(function () {
 
         let csvContent = "data:text/csv;charset=utf-8,";
         
-        // Match sample file names: merchant_denied_sample.xlsx, indent_path_sample.xlsx, delivery_report_sample.xlsx
-        let filename = `merchant_denied_sample.xlsx`;
-        if (reportType === 'Indent Path') {
-            filename = `indent_path_sample.xlsx`;
-        } else if (reportType === 'Delivery Report') {
+        // Match sample file names: indent_path_sample.xlsx, delivery_report_sample.xlsx
+        let filename = `indent_path_sample.xlsx`;
+        if (reportType === 'Delivery Report') {
             filename = `delivery_report_sample.xlsx`;
         }
 
-        if (reportType === 'Merchant Denied Report') {
-            csvContent += "Merchant ID,Merchant Name,Bank,Denial Reason,Denied Date,Status\n";
-            csvContent += `M1001,ABC Store,${bank},Low Credit Score,2026-05-19,Rejected\n`;
-            csvContent += `M1002,XYZ Retail,${bank},Invalid KYC Documents,2026-05-18,Rejected\n`;
-        } else if (reportType === 'Indent Path') {
+        if (reportType === 'Indent Path') {
             csvContent += "Indent ID,Bank,Device Type,Path Code,Terminal ID,Dispatch Date\n";
             csvContent += `IND88392,${bank},Soundbox,PATH_MUM_01,T44890,2026-05-19\n`;
             csvContent += `IND88393,${bank},Soundbox,PATH_BLR_02,T44891,2026-05-18\n`;
