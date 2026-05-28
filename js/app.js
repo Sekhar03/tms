@@ -35,8 +35,13 @@ $(document).ready(function () {
             const bank = bankSelect.val();
             const reportType = reportTypeSelect.val();
 
-            // Redirect to upload page with selection params
-            window.location.href = `upload.html?bank=${encodeURIComponent(bank)}&reportType=${encodeURIComponent(reportType)}`;
+            // If Indent Path, navigate directly to success page since no upload is required
+            if (reportType === 'Indent Path') {
+                window.location.href = `success.html?bank=${encodeURIComponent(bank)}&reportType=${encodeURIComponent(reportType)}&fileName=indent_path_records.xlsx`;
+            } else {
+                // Redirect to upload page with selection params
+                window.location.href = `upload.html?bank=${encodeURIComponent(bank)}&reportType=${encodeURIComponent(reportType)}`;
+            }
         });
     }
 
@@ -178,8 +183,54 @@ $(document).ready(function () {
 
         // Dynamic success content setup
         if (reportType) {
-            let msg = 'Merchant denied report uploaded successfully.';
+            let msg = 'Report uploaded successfully.';
+            if (reportType === 'Indent Path') {
+                msg = 'Indent path report uploaded successfully.';
+            } else if (reportType === 'Delivery Report') {
+                msg = 'Delivery report uploaded successfully.';
+            } else if (reportType === 'Merchant Denial Report' || reportType === 'Merchant Denied Report') {
+                msg = 'Merchant denied report uploaded successfully.';
+            }
             $('#reports-success-step .alert-success').html(`<i class="bi bi-check-circle-fill me-2"></i> ${msg}`);
+        }
+
+        // Show bucket section only for Indent Path
+        if (reportType === 'Indent Path') {
+            seconds = 8;
+            
+            const dateObj = new Date();
+            const yearStr = dateObj.getFullYear();
+            const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const monthStr = MONTHS_LONG[dateObj.getMonth()];
+            const dayStr = dateObj.getDate() + '-' + MONTHS_SHORT[dateObj.getMonth()];
+            const bankFolder = bank.split(' ')[0].toUpperCase();
+            
+            const nameToUse = fileName || 'indent_path_records.xlsx';
+            const bucketUrl = `gs://tms-indent-bucket/${bankFolder}/${yearStr}/${monthStr}/${dayStr}/${nameToUse}`;
+            const consoleBucketUrl = `https://console.cloud.google.com/storage/browser/tms-indent-bucket/${bankFolder}/${yearStr}/${monthStr}/${dayStr}`;
+            
+            const bucketHtml = `
+                <div class="bucket-path-box mx-auto my-4 text-start" style="max-width: 500px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <i class="bi bi-folder2-open text-teal" style="font-size:1.15rem;"></i>
+                        <span style="font-weight:600; font-size:0.88rem; color:#1e293b;">Bucket Path</span>
+                    </div>
+                    <div class="bucket-url-display d-flex align-items-center justify-content-between gap-2">
+                        <code id="bucketUrlText" class="bucket-url-text">${bucketUrl}</code>
+                        <button type="button" id="btnCopyBucketUrl" class="btn-copy-url" title="Copy path">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <a href="${consoleBucketUrl}" id="btnGotoBucket" target="_blank" class="btn-goto-bucket gap-2">
+                        <i class="bi bi-box-arrow-up-right"></i>Go to Bucket
+                    </a>
+                </div>
+            `;
+            
+            $('#reports-success-step .alert-success').after(bucketHtml);
         }
 
         $('#success-countdown').text(seconds);
@@ -225,14 +276,21 @@ $(document).ready(function () {
         let csvContent = "data:text/csv;charset=utf-8,";
         let filename = `${bank.replace(/\s+/g, '_')}_${reportType.replace(/\s+/g, '_')}_template.csv`;
 
-        if (reportType === 'Merchant Denial Report' || reportType === 'Merchant Denied Report') {
+        if (reportType === 'Merchant Denial Report') {
             csvContent += "Merchant ID,Merchant Name,Bank,Denial Reason,Denied Date,Status\n";
             csvContent += `M1001,ABC Store,${bank},Low Credit Score,2026-05-19,Rejected\n`;
             csvContent += `M1002,XYZ Retail,${bank},Invalid KYC Documents,2026-05-18,Rejected\n`;
+        } else if (reportType === 'Indent Path') {
+            csvContent += "Indent ID,Bank,Device Type,Path Code,Terminal ID,Dispatch Date\n";
+            csvContent += `IND88392,${bank},Soundbox,PATH_MUM_01,T44890,2026-05-19\n`;
+            csvContent += `IND88393,${bank},Soundbox,PATH_BLR_02,T44891,2026-05-18\n`;
+        } else if (reportType === 'Delivery Report') {
+            csvContent += "Delivery ID,Order ID,Bank,Courier Partner,AWB Number,Delivery Status,Estimated Delivery\n";
+            csvContent += `DEL90021,ORD77309,${bank},BlueDart,AWB998822,Delivered,2026-05-19\n`;
+            csvContent += `DEL90022,ORD77310,${bank},Delhivery,AWB998823,In Transit,2026-05-21\n`;
         } else {
-            csvContent += "Merchant ID,Merchant Name,Bank,Denial Reason,Denied Date,Status\n";
-            csvContent += `M1001,ABC Store,${bank},Low Credit Score,2026-05-19,Rejected\n`;
-            csvContent += `M1002,XYZ Retail,${bank},Invalid KYC Documents,2026-05-18,Rejected\n`;
+            csvContent += "Serial Number,Bank,Report Name,Generated Date\n";
+            csvContent += `1,${bank},${reportType},2026-05-19\n`;
         }
 
         const encodedUri = encodeURI(csvContent);
