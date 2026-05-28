@@ -1,6 +1,10 @@
 $(document).ready(function () {
     let selectedFile = null;
 
+    // Load globally selected bank
+    const activeBank = localStorage.getItem('selectedBank') || 'Bank of Baroda';
+    console.log("Active Bank selected globally:", activeBank);
+
     // Sidebar toggler for mobile responsiveness
     $('.sidebar-toggle-btn').on('click', function () {
         $('.isu-sidebar').toggleClass('show');
@@ -47,20 +51,16 @@ $(document).ready(function () {
     $('#tmsInventoryForm').on('submit', function (e) {
         e.preventDefault();
 
-        const bank = $('#bankSelect').val();
+        // Get currently selected bank from global header selection
+        const bank = localStorage.getItem('selectedBank') || 'Bank of Baroda';
         const fileErrorMsg = $('#file-error-message');
 
         let isValid = true;
 
         // Reset inline errors
         fileErrorMsg.addClass('d-none');
-        $('#bankSelect').removeClass('is-invalid');
 
         // Validation
-        if (!bank) { 
-            $('#bankSelect').addClass('is-invalid'); 
-            isValid = false; 
-        }
         if (!selectedFile) {
             fileErrorMsg.text('File is required. Please browse and select a file.').removeClass('d-none');
             isValid = false;
@@ -111,7 +111,7 @@ $(document).ready(function () {
     $('#download-sample-btn').on('click', function (e) {
         e.preventDefault();
         
-        const bank = $('#bankSelect').val() || 'Bank_of_Baroda';
+        const bank = localStorage.getItem('selectedBank') || 'Bank_of_Baroda';
         const filename = `merchant_denied_sample.xlsx`;
 
         let csvContent = "data:text/csv;charset=utf-8,";

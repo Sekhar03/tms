@@ -25,12 +25,22 @@
             <button class="hamburger-btn" type="button" aria-label="Toggle navigation" id="sidebarToggle">
                 <i class="bi bi-list text-dark fs-4"></i>
             </button>
-            <!-- Bank Dropdown Pill (Moved to left side next to hamburger menu) -->
-            <a href="#" class="bank-selector-pill ms-2">
-                <i class="bi bi-bank"></i>
-                <span>Bank of Baroda</span>
-                <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-            </a>
+            <!-- Bank Dropdown Pill (Interactive Dropdown) -->
+            <div class="dropdown">
+                <a href="#" class="bank-selector-pill ms-2 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none;">
+                    <i class="bi bi-bank"></i>
+                    <span id="selected-bank-code">Bank of Baroda</span>
+                </a>
+                <ul class="dropdown-menu shadow border-0 mt-2" style="border-radius: 12px; font-size: 0.9rem;">
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="Bank of Baroda">Bank of Baroda</a></li>
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="HDFC Bank">HDFC Bank</a></li>
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="ICICI Bank">ICICI Bank</a></li>
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="Axis Bank">Axis Bank</a></li>
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="SBI">SBI</a></li>
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="Yes Bank">Yes Bank</a></li>
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="Kotak Bank">Kotak Bank</a></li>
+                </ul>
+            </div>
         </div>
         
         <div class="d-flex align-items-center gap-3">
@@ -226,6 +236,19 @@
         // Mobile toggle
         $('#sidebarToggle').on('click', function() {
             $('.portal-sidebar').toggleClass('show');
+        });
+
+        // Globally Selected Bank handling
+        $(document).ready(function() {
+            const savedBank = localStorage.getItem('selectedBank') || 'Bank of Baroda';
+            $('#selected-bank-code').text(savedBank);
+
+            $('.bank-option').on('click', function(e) {
+                e.preventDefault();
+                const selectedBank = $(this).data('bank');
+                localStorage.setItem('selectedBank', selectedBank);
+                $('#selected-bank-code').text(selectedBank);
+            });
         });
     </script>
 </body>
