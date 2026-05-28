@@ -77,7 +77,7 @@ $(document).ready(function () {
     $('#tmsInventoryForm').on('submit', function (e) {
         e.preventDefault();
 
-        const bank       = $('#bankSelect').val();
+        const bank       = localStorage.getItem('selectedBank') || 'Bank of Baroda';
         const reportType = $('#reportTypeSelect').val();
         const fileErrorMsg = $('#file-error-message');
 
@@ -85,11 +85,9 @@ $(document).ready(function () {
 
         // Reset inline errors
         fileErrorMsg.addClass('d-none');
-        $('#bankSelect').removeClass('is-invalid');
         $('#reportTypeSelect').removeClass('is-invalid');
 
         // Manual validation — do NOT use form.checkValidity()
-        if (!bank)       { $('#bankSelect').addClass('is-invalid');       isValid = false; }
         if (!reportType) { $('#reportTypeSelect').addClass('is-invalid'); isValid = false; }
         if (!selectedFile && reportType !== 'Indent Path') {
             fileErrorMsg.text('File is required. Please browse and select a file.').removeClass('d-none');
