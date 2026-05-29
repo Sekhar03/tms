@@ -162,7 +162,7 @@
             
             <div class="row g-4 mt-2">
                 <!-- Box 1: Add to Inventory -->
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-4" id="card-add-to-inventory">
                     <a href="bulk-upload-form.html?type=Add%20to%20Inventory" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
                         <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #f0fdf4; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #16a34a; font-size: 1.5rem;">
                             <i class="bi bi-plus-circle-fill"></i>
@@ -172,7 +172,7 @@
                 </div>
 
                 <!-- Box 2: Bank Code Inventory -->
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-4" id="card-bank-code-inventory">
                     <a href="bulk-upload-form.html?type=Bank%20Code%20Inventory" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
                         <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #eff6ff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #2563eb; font-size: 1.5rem;">
                             <i class="bi bi-bank"></i>
@@ -182,7 +182,7 @@
                 </div>
 
                 <!-- Box 3: Inventory Removal -->
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-4" id="card-inventory-removal">
                     <a href="bulk-upload-form.html?type=Inventory%20Removal" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
                         <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #fef2f2; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #dc2626; font-size: 1.5rem;">
                             <i class="bi bi-trash-fill"></i>
@@ -192,7 +192,7 @@
                 </div>
 
                 <!-- Box 4: Delivery Status Update -->
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-4" id="card-delivery-status-update">
                     <a href="bulk-upload-form.html?type=Delivery%20Status%20Update" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
                         <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #faf5ff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #9333ea; font-size: 1.5rem;">
                             <i class="bi bi-truck"></i>
@@ -202,7 +202,7 @@
                 </div>
 
                 <!-- Box 5: Device Installation -->
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-4" id="card-device-installation">
                     <a href="bulk-upload-form.html?type=Device%20Installation" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
                         <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #fff7ed; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #ea580c; font-size: 1.5rem;">
                             <i class="bi bi-gear-fill"></i>
@@ -212,7 +212,7 @@
                 </div>
 
                 <!-- Box 6: Merchant Denial Report -->
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-4" id="card-merchant-denial-report">
                     <a href="merchant-denial.html" class="dashboard-module-card functional-card" style="background-color: #ffffff; border: 1px solid var(--portal-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); height: 180px;">
                         <div style="width: 54px; height: 54px; border-radius: 50%; background-color: #e0f2fe; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #00b4d8; font-size: 1.5rem;">
                             <i class="bi bi-file-earmark-x-fill"></i>
@@ -250,15 +250,37 @@
 
         // Globally Selected Bank handling
         $(document).ready(function() {
-            // Automatically select 'All Banks' when clicking / opening Bulk Upload
-            localStorage.setItem('selectedBank', 'All Banks');
-            $('#selected-bank-code').text('All Banks');
+            function updateVisibleModules(bank) {
+                if (bank === 'All Banks') {
+                    $('#card-add-to-inventory').show();
+                    $('#card-delivery-status-update').show();
+                    
+                    $('#card-bank-code-inventory').hide();
+                    $('#card-inventory-removal').hide();
+                    $('#card-device-installation').hide();
+                    $('#card-merchant-denial-report').hide();
+                } else {
+                    $('#card-add-to-inventory').show();
+                    $('#card-delivery-status-update').show();
+                    
+                    $('#card-bank-code-inventory').show();
+                    $('#card-inventory-removal').show();
+                    $('#card-device-installation').show();
+                    $('#card-merchant-denial-report').show();
+                }
+            }
+
+            // Load saved bank or default to 'All Banks'
+            const savedBank = localStorage.getItem('selectedBank') || 'All Banks';
+            $('#selected-bank-code').text(savedBank);
+            updateVisibleModules(savedBank);
 
             $('.bank-option').on('click', function(e) {
                 e.preventDefault();
                 const selectedBank = $(this).data('bank');
                 localStorage.setItem('selectedBank', selectedBank);
                 $('#selected-bank-code').text(selectedBank);
+                updateVisibleModules(selectedBank);
             });
         });
     </script>

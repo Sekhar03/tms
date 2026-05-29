@@ -232,9 +232,9 @@
 
         // Globally Selected Bank handling
         $(document).ready(function() {
-            // Automatically select 'All Banks' when clicking / opening Bulk Upload Form
-            localStorage.setItem('selectedBank', 'All Banks');
-            $('#selected-bank-code').text('All Banks');
+            // Load saved bank or default to 'All Banks'
+            const savedBank = localStorage.getItem('selectedBank') || 'All Banks';
+            $('#selected-bank-code').text(savedBank);
 
             $('.bank-option').on('click', function(e) {
                 e.preventDefault();
