@@ -31,11 +31,11 @@ module.exports = async (req, res) => {
         // 1. Determine active banks
         let activeBanks = [];
         if (emails.length > 0) {
-            const directBanks = [...new Set(emails.map(item => item.bank))].filter(b => b !== 'All Banks');
+            const directBanks = [...new Set(emails.map(item => item.bank))].filter(b => b !== 'Master');
             if (directBanks.length > 0) {
                 activeBanks = directBanks;
             }
-            if (emails.some(item => item.bank === 'All Banks') || activeBanks.length === 0) {
+            if (emails.some(item => item.bank === 'Master') || activeBanks.length === 0) {
                 if (!activeBanks.includes('HDFC Bank')) activeBanks.push('HDFC Bank');
                 if (!activeBanks.includes('SBI')) activeBanks.push('SBI');
             }
@@ -86,7 +86,7 @@ module.exports = async (req, res) => {
 
         let resolvedCount = 0;
         activeBanks.forEach(bank => {
-            const bankRecipients = [...new Set(emails.filter(item => item.bank === bank || item.bank === 'All Banks').map(item => item.email))];
+            const bankRecipients = [...new Set(emails.filter(item => item.bank === bank || item.bank === 'Master').map(item => item.email))];
             if (bankRecipients.length > 0) {
                 addServerLog('EMAIL', `Resolved recipients for [${bank}]: [${bankRecipients.join(', ')}]`);
                 resolvedCount++;
@@ -126,7 +126,7 @@ module.exports = async (req, res) => {
 
         // Build dispatch items
         activeBanks.forEach(bank => {
-            const bankRecipients = [...new Set(emails.filter(item => item.bank === bank || item.bank === 'All Banks').map(item => item.email))];
+            const bankRecipients = [...new Set(emails.filter(item => item.bank === bank || item.bank === 'Master').map(item => item.email))];
             if (bankRecipients.length === 0) return;
 
             const recipientListStr = bankRecipients.join(', ');
@@ -246,7 +246,7 @@ module.exports = async (req, res) => {
             }
         }
 
-        addServerLog('SYSTEM', `Daily scheduler process completed successfully for all banks.`);
+        addServerLog('SYSTEM', `Daily scheduler process completed successfully for Master.`);
         res.status(200).json({ logs: logEntries, dispatches });
 
     } catch (error) {

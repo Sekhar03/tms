@@ -1,7 +1,7 @@
 // Server-side in-memory cache to retain state during warm starts.
 // Initializes with the default configuration list.
 let emails = [
-    { email: 'ops-lead@iserveu.in', bank: 'All Banks' },
+    { email: 'ops-lead@iserveu.in', bank: 'Master' },
     { email: 'bank-audit@firstbank.com', bank: 'SBI' }
 ];
 

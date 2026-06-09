@@ -7,7 +7,7 @@ $(document).ready(function () {
     // 1. EMAIL MANAGEMENT
     let emails = [];
     const defaultEmails = [
-        { email: 'ops-lead@iserveu.in', bank: 'All Banks' },
+        { email: 'ops-lead@iserveu.in', bank: 'Master' },
         { email: 'bank-audit@firstbank.com', bank: 'SBI' }
     ];
 
@@ -20,7 +20,7 @@ $(document).ready(function () {
                 if (Array.isArray(parsed)) {
                     emails = parsed.map(item => {
                         if (typeof item === 'string') {
-                            return { email: item, bank: 'All Banks' };
+                            return { email: item, bank: 'Master' };
                         }
                         return item;
                     });
@@ -77,7 +77,7 @@ $(document).ready(function () {
 
         emails.forEach((emailObj, index) => {
             let badgeClass = 'bg-secondary';
-            if (emailObj.bank === 'All Banks') {
+            if (emailObj.bank === 'Master') {
                 badgeClass = 'bg-success';
             } else if (emailObj.bank === 'HDFC Bank') {
                 badgeClass = 'bg-primary';
@@ -506,11 +506,11 @@ $(document).ready(function () {
         // Get active banks from recipients list
         let activeBanks = [];
         if (emails.length > 0) {
-            const directBanks = [...new Set(emails.map(item => item.bank))].filter(b => b !== 'All Banks');
+            const directBanks = [...new Set(emails.map(item => item.bank))].filter(b => b !== 'Master');
             if (directBanks.length > 0) {
                 activeBanks = directBanks;
             }
-            if (emails.some(item => item.bank === 'All Banks') || activeBanks.length === 0) {
+            if (emails.some(item => item.bank === 'Master') || activeBanks.length === 0) {
                 if (!activeBanks.includes('HDFC Bank')) activeBanks.push('HDFC Bank');
                 if (!activeBanks.includes('SBI')) activeBanks.push('SBI');
             }
@@ -580,7 +580,7 @@ $(document).ready(function () {
 
             let resolvedCount = 0;
             activeBanks.forEach(bank => {
-                const bankRecipients = [...new Set(emails.filter(item => item.bank === bank || item.bank === 'All Banks').map(item => item.email))];
+                const bankRecipients = [...new Set(emails.filter(item => item.bank === bank || item.bank === 'Master').map(item => item.email))];
                 if (bankRecipients.length > 0) {
                     addLog('EMAIL', `Resolved recipients for [${bank}]: [${bankRecipients.join(', ')}]`);
                     resolvedCount++;
@@ -612,7 +612,7 @@ $(document).ready(function () {
 
             // Compile dispatch info for each active bank
             activeBanks.forEach(bank => {
-                const bankRecipients = emails.filter(item => item.bank === bank || item.bank === 'All Banks');
+                const bankRecipients = emails.filter(item => item.bank === bank || item.bank === 'Master');
                 if (bankRecipients.length === 0) return;
 
                 const recipientEmails = [...new Set(bankRecipients.map(item => item.email))];
@@ -745,7 +745,7 @@ $(document).ready(function () {
 
             function completeAllDispatches(dispatchesList) {
                 $('#step-email').removeClass('active').addClass('completed');
-                addLog('SYSTEM', `Daily scheduler process completed successfully for all banks.`);
+                addLog('SYSTEM', `Daily scheduler process completed successfully for Master.`);
                 
                 const toast = $('#simToast');
                 toast.addClass('show');
@@ -859,7 +859,7 @@ $(document).ready(function () {
 
         function completeAllDispatches(dispatchesList) {
             $('#step-email').removeClass('active').addClass('completed');
-            addLog('SYSTEM', `Daily scheduler process completed successfully for all banks.`);
+            addLog('SYSTEM', `Daily scheduler process completed successfully for Master.`);
             
             const toast = $('#simToast');
             toast.addClass('show');
@@ -971,7 +971,7 @@ $(document).ready(function () {
             const dateStr = downloadParam.substring(lastHyphenIndex + 1);
             const bankSlug = downloadParam.substring(0, lastHyphenIndex);
             
-            let bankName = "All Banks";
+            let bankName = "Master";
             if (bankSlug === "hdfc_bank") bankName = "HDFC Bank";
             else if (bankSlug === "icici_bank") bankName = "ICICI Bank";
             else if (bankSlug === "axis_bank") bankName = "Axis Bank";

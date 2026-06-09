@@ -35,7 +35,7 @@
                     <span id="selected-bank-code">Bank of Baroda</span>
                 </a>
                 <ul class="dropdown-menu shadow border-0 mt-2" style="border-radius: 12px; font-size: 0.9rem;">
-                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="All Banks">All Banks</a></li>
+                    <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="Master">Master</a></li>
                     <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="Bank of Baroda">Bank of Baroda</a></li>
                     <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="HDFC Bank">HDFC Bank</a></li>
                     <li><a class="dropdown-item py-2 px-3 fw-semibold bank-option" href="#" data-bank="ICICI Bank">ICICI Bank</a></li>
@@ -232,7 +232,7 @@
         // Globally Selected Bank handling
         $(document).ready(function() {
             function updateVisibleModules(bank) {
-                if (bank === 'All Banks') {
+                if (bank === 'Master') {
                     $('#card-add-to-inventory').show();
                     $('#card-delivery-status-update').show();
                     
@@ -251,8 +251,8 @@
                 }
             }
 
-            // Load saved bank or default to 'All Banks'
-            const savedBank = localStorage.getItem('selectedBank') || 'All Banks';
+            // Load saved bank or default to 'Master'
+            const savedBank = localStorage.getItem('selectedBank') || 'Master';
             $('#selected-bank-code').text(savedBank);
             updateVisibleModules(savedBank);
 
